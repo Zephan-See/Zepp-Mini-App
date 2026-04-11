@@ -10,7 +10,7 @@
 //
 import { BasePage } from '@zeppos/zml/base-page'
 import { createWidget, widget, prop, align } from '@zos/ui'
-import { pop } from '@zos/router'
+import { push } from '@zos/router'
 import { localStorage } from '@zos/storage'
 import { vibrate } from '@zos/interaction'
 
@@ -19,6 +19,7 @@ const TOP = 60
 
 const C = {
   bg:        0x000000,
+  header:    0x0A0E1A,
   title:     0xFFFFFF,
   backBg:    0x111122,
   backPress: 0x222244,
@@ -38,10 +39,14 @@ const C = {
   histBg:    0x0A0A1A,
   histPress: 0x1A1A3A,
   histTxt:   0x6688BB,
+  help:      0x7380A6,
 }
 
-// BUTTON widget refs for the 4 octet boxes
 let _boxBtns = []
+let _boxTexts = []
+let _activeBoxBg = null
+let _boxUnderlines = []
+let _saveStatus = null
 
 Page(
   BasePage({
@@ -69,42 +74,67 @@ Page(
     build() {
       const self = this
       createWidget(widget.FILL_RECT, { x: 0, y: 0, w: W, h: 450, color: C.bg })
+      createWidget(widget.FILL_RECT, { x: 0, y: 0, w: W, h: 92, color: C.header })
 
       // Header
+      createWidget(widget.TEXT, {
+        x: 0, y: TOP - 2, w: W, h: 28,
+        text: 'IP SETUP', text_size: 20, color: C.title,
+        align_h: align.CENTER_H,
+      })
+      createWidget(widget.TEXT, {
+        x: 0, y: TOP + 22, w: W, h: 16,
+        text: 'Tap a block, then type numbers', text_size: 11, color: C.help,
+        align_h: align.CENTER_H,
+      })
+      _saveStatus = createWidget(widget.TEXT, {
+        x: 70, y: TOP + 44, w: 250, h: 14,
+        text: '', text_size: 11, color: C.histTxt,
+        align_h: align.CENTER_H,
+      })
       createWidget(widget.BUTTON, {
         x: 6, y: TOP, w: 60, h: 30,
         normal_color: C.backBg, press_color: C.backPress,
         text: 'BACK', text_size: 13, color: C.back,
-        click_func() { self.saveAndExit() },
-      })
-      createWidget(widget.TEXT, {
-        x: 0, y: TOP + 2, w: W, h: 28,
-        text: 'IP SETUP', text_size: 20, color: C.title,
-        align_h: align.CENTER_H,
+        click_func() { push({ url: 'page/home/index.page' }) },
       })
 
-      // 4 octet boxes — BUTTON widget so text is updatable + clickable
-      // Box: w=78, gap=10. Total=4*78+3*10=342. margin=24
-      const BOX_W = 78, BOX_H = 54, BOX_Y = TOP + 38
+      // 4 octet boxes
+      const BOX_W = 78, BOX_H = 54, BOX_Y = TOP + 68
       const BOX_GAP = 10
       const BOX_LEFT = Math.floor((W - (4 * BOX_W + 3 * BOX_GAP)) / 2)
 
       _boxBtns = []
+      _boxTexts = []
+      _boxUnderlines = []
+      _activeBoxBg = createWidget(widget.FILL_RECT, {
+        x: BOX_LEFT, y: BOX_Y, w: BOX_W, h: BOX_H, color: C.boxActive,
+      })
+
       for (let i = 0; i < 4; i++) {
         const bx = BOX_LEFT + i * (BOX_W + BOX_GAP)
-        const isActive = i === 0
         const idx = i
 
         const btn = createWidget(widget.BUTTON, {
           x: bx, y: BOX_Y, w: BOX_W, h: BOX_H,
-          normal_color: isActive ? C.boxActive : C.boxInact,
+          normal_color: C.boxInact,
           press_color:  C.boxPress,
-          text: self.state.octets[i],
+          text: ' ',
           text_size: 24,
           color: C.boxTxt,
           click_func() { self.selectBox(idx) },
         })
         _boxBtns.push(btn)
+        _boxTexts.push(createWidget(widget.TEXT, {
+          x: bx + 8, y: BOX_Y + 13, w: BOX_W - 16, h: 28,
+          text: self.state.octets[i],
+          text_size: 24, color: C.boxTxt,
+          align_h: align.CENTER_H,
+        }))
+        _boxUnderlines.push(createWidget(widget.FILL_RECT, {
+          x: bx, y: BOX_Y + BOX_H + 2, w: BOX_W, h: 4,
+          color: idx === 0 ? C.boxActive : C.boxInact,
+        }))
 
         // Dot separator
         if (i < 3) {
@@ -180,16 +210,16 @@ Page(
       try { vibrate({ type: 'short' }) } catch (e) {}
       if (key === 'DEL')  { this.delPress(); return }
       if (key === 'SAVE') { this.saveAndExit(); return }
+      if (_saveStatus) {
+        _saveStatus.setProperty(prop.MORE, { text: '', color: C.histTxt })
+      }
       this.digitPress(key)
     },
 
     digitPress(d) {
       if (this.state.inputBuffer.length >= 3) return
       this.state.inputBuffer += d
-      const idx = this.state.activeIdx
-      if (_boxBtns[idx]) {
-        _boxBtns[idx].setProperty(prop.MORE, { text: this.state.inputBuffer })
-      }
+      this.refreshBoxes()
       // Auto-advance after 3 digits
       if (this.state.inputBuffer.length === 3) {
         this.commitCurrent()
@@ -204,9 +234,7 @@ Page(
     delPress() {
       if (this.state.inputBuffer.length > 0) {
         this.state.inputBuffer = this.state.inputBuffer.slice(0, -1)
-        const idx = this.state.activeIdx
-        const display = this.state.inputBuffer || this.state.octets[idx] || '0'
-        if (_boxBtns[idx]) _boxBtns[idx].setProperty(prop.MORE, { text: display })
+        this.refreshBoxes()
       } else if (this.state.activeIdx > 0) {
         this.state.activeIdx--
         this.state.octets[this.state.activeIdx] = ''
@@ -230,17 +258,28 @@ Page(
     refreshBoxes() {
       for (let i = 0; i < 4; i++) {
         const isActive = i === this.state.activeIdx
-        if (_boxBtns[i]) {
-          const showBuf = isActive && this.state.inputBuffer !== ''
-          const text = showBuf
-            ? this.state.inputBuffer
-            : (this.state.octets[i] || (isActive ? '_' : '0'))
-          _boxBtns[i].setProperty(prop.MORE, {
-            normal_color: isActive ? C.boxActive : C.boxInact,
+        const showBuf = isActive && this.state.inputBuffer !== ''
+        const text = showBuf
+          ? this.state.inputBuffer
+          : (this.state.octets[i] || (isActive ? '_' : '0'))
+        if (_boxTexts[i]) {
+          _boxTexts[i].setProperty(prop.MORE, {
             text,
+            color: isActive ? C.title : C.boxTxt,
           })
         }
       }
+      if (_boxBtns[this.state.activeIdx]) {
+        const x = 24 + this.state.activeIdx * 88
+        if (_activeBoxBg) _activeBoxBg.setProperty(prop.MORE, { x, color: C.boxActive })
+      }
+      _boxUnderlines.forEach((line, idx) => {
+        if (line) {
+          line.setProperty(prop.MORE, {
+            color: idx === this.state.activeIdx ? C.boxActive : C.boxInact,
+          })
+        }
+      })
     },
 
     loadIP(ipStr) {
@@ -254,23 +293,51 @@ Page(
     },
 
     saveAndExit() {
-      this.commitCurrent()
-      const octets = this.state.octets.map(function(o) {
-        const v = parseInt(o, 10)
-        if (isNaN(v) || v < 0) return '0'
-        return String(Math.min(v, 255))
-      })
-      const ip = octets.join('.')
-      localStorage.setItem('currentIP', ip)
-      let hist = (this.state.history || []).filter(function(h) { return h !== ip })
-      hist.unshift(ip)
-      if (hist.length > 5) hist = hist.slice(0, 5)
-      localStorage.setItem('ipHistory', JSON.stringify(hist))
-      pop()
+      try {
+        this.commitCurrent()
+        const octets = this.state.octets.map(function(o) {
+          const v = parseInt(o, 10)
+          if (isNaN(v) || v < 0) return '0'
+          return String(Math.min(v, 255))
+        })
+        const ip = octets.join('.')
+        if (_saveStatus) {
+          _saveStatus.setProperty(prop.MORE, { text: 'IP ' + ip, color: C.histTxt })
+        }
+
+        localStorage.setItem('currentIP', ip)
+        if (_saveStatus) {
+          _saveStatus.setProperty(prop.MORE, { text: 'Saved to watch: ' + ip, color: C.keySavePr })
+        }
+
+        let hist = (this.state.history || []).filter(function(h) { return h !== ip })
+        hist.unshift(ip)
+        if (hist.length > 5) hist = hist.slice(0, 5)
+        this.state.history = hist
+        localStorage.setItem('ipHistory', JSON.stringify(hist))
+        if (_saveStatus) {
+          _saveStatus.setProperty(prop.MORE, { text: 'Saved to watch: ' + ip, color: C.keySavePr })
+        }
+
+        setTimeout(() => {
+          push({ url: 'page/home/index.page' })
+        }, 700)
+      } catch (err) {
+        if (_saveStatus) {
+          _saveStatus.setProperty(prop.MORE, {
+            text: 'ERR ' + (err && err.message ? err.message : 'save failed'),
+            color: C.keyDelPr,
+          })
+        }
+      }
     },
 
     onDestroy() {
       _boxBtns = []
+      _boxTexts = []
+      _activeBoxBg = null
+      _boxUnderlines = []
+      _saveStatus = null
       this.log('IP Setup onDestroy')
     },
   }),

@@ -9,6 +9,7 @@ const TOP = 60
 
 const C = {
   bg:       0x000000,
+  header:   0x0A0E1A,
   title:    0xFFFFFF,
   backBg:   0x111122,
   backPress:0x222244,
@@ -24,30 +25,29 @@ const C = {
   code:     0x00CC66,
   codeBg:   0x061A06,
   note:     0x777799,
+  help:     0x7380A6,
   divider:  0x1A1A2E,
 }
 
 let _tabMac = null
 let _tabWin = null
 let _stepWidgets = []
+let _tabActiveBg = null
+let _tabMacIndicator = null
+let _tabWinIndicator = null
+let _tabMacText = null
+let _tabWinText = null
+let _qrImage = null
+let _qrCaption = null
 
 const MAC_STEPS = [
-  { n: '1', t: 'Download from:' },
-  { n: '',  t: 'github.com/Zephan-See/Zepp-Mini-App', code: true },
-  { n: '2', t: 'Double-click START_BRIDGE.command' },
-  { n: '3', t: 'Note the IP shown in terminal' },
-  { n: '4', t: 'Watch: IP SETUP -> enter that IP' },
-  { n: '5', t: 'Open presentation, tap FLIPPER!' },
+  { n: '1', t: 'Scan the QR code' },
+  { n: '2', t: 'Copy and paste into Terminal' },
 ]
 
 const WIN_STEPS = [
-  { n: '1', t: 'Download from:' },
-  { n: '',  t: 'github.com/Zephan-See/Zepp-Mini-App', code: true },
-  { n: '2', t: 'Open PowerShell in pc-controller/' },
-  { n: '',  t: 'node server.js', code: true },
-  { n: '3', t: 'Note the IP shown in terminal' },
-  { n: '4', t: 'Watch: IP SETUP -> enter that IP' },
-  { n: '5', t: 'Open presentation, tap FLIPPER!' },
+  { n: '1', t: 'Scan the QR code' },
+  { n: '2', t: 'Copy and paste into PowerShell' },
 ]
 
 Page(
@@ -60,6 +60,7 @@ Page(
     build() {
       const self = this
       createWidget(widget.FILL_RECT, { x: 0, y: 0, w: W, h: 450, color: C.bg })
+      createWidget(widget.FILL_RECT, { x: 0, y: 0, w: W, h: 92, color: C.header })
 
       // Header
       createWidget(widget.BUTTON, {
@@ -69,24 +70,48 @@ Page(
         click_func() { pop() },
       })
       createWidget(widget.TEXT, {
-        x: 0, y: TOP + 2, w: W, h: 28,
+        x: 0, y: TOP - 2, w: W, h: 28,
         text: 'INSTALL GUIDE', text_size: 18, color: C.title,
+        align_h: align.CENTER_H,
+      })
+      createWidget(widget.TEXT, {
+        x: 0, y: TOP + 22, w: W, h: 16,
+        text: 'Choose your computer setup', text_size: 11, color: C.help,
         align_h: align.CENTER_H,
       })
 
       // Platform tabs
-      const TAB_Y = TOP + 38
+      const TAB_Y = TOP + 52
+      _tabActiveBg = createWidget(widget.FILL_RECT, {
+        x: 6, y: TAB_Y, w: 184, h: 36, color: C.tabActBg,
+      })
+      _tabMacIndicator = createWidget(widget.FILL_RECT, {
+        x: 6, y: TAB_Y + 38, w: 184, h: 4, color: C.tabActBg,
+      })
+      _tabWinIndicator = createWidget(widget.FILL_RECT, {
+        x: 200, y: TAB_Y + 38, w: 184, h: 4, color: C.tabInaBg,
+      })
       _tabMac = createWidget(widget.BUTTON, {
         x: 6, y: TAB_Y, w: 184, h: 36,
-        normal_color: C.tabActBg, press_color: C.tabActPr,
-        text: 'MAC', text_size: 18, color: C.tabActTx,
+        normal_color: C.tabInaBg, press_color: C.tabInaPr,
+        text: ' ', text_size: 18, color: C.tabActTx,
         click_func() { self.setTab('mac') },
       })
       _tabWin = createWidget(widget.BUTTON, {
         x: 200, y: TAB_Y, w: 184, h: 36,
         normal_color: C.tabInaBg, press_color: C.tabInaPr,
-        text: 'WINDOWS', text_size: 18, color: C.tabInaTx,
+        text: ' ', text_size: 18, color: C.tabActTx,
         click_func() { self.setTab('win') },
+      })
+      _tabMacText = createWidget(widget.TEXT, {
+        x: 6, y: TAB_Y + 8, w: 184, h: 20,
+        text: 'MAC', text_size: 18, color: C.tabActTx,
+        align_h: align.CENTER_H,
+      })
+      _tabWinText = createWidget(widget.TEXT, {
+        x: 200, y: TAB_Y + 8, w: 184, h: 20,
+        text: 'WINDOWS', text_size: 18, color: C.tabInaTx,
+        align_h: align.CENTER_H,
       })
 
       createWidget(widget.FILL_RECT, { x: 0, y: TAB_Y + 40, w: W, h: 1, color: C.divider })
@@ -100,35 +125,38 @@ Page(
       let y = startY
 
       steps.forEach(function(s) {
-        if (s.code) {
-          createWidget(widget.FILL_RECT, { x: 8, y, w: W - 16, h: 36, color: C.codeBg })
-          const t = createWidget(widget.TEXT, {
-            x: 14, y: y + 10, w: W - 28, h: 18,
-            text: s.t, text_size: 12, color: C.code,
+        if (s.n) {
+          createWidget(widget.TEXT, {
+            x: 22, y, w: 18, h: 18,
+            text: s.n + '.', text_size: 12, color: C.stepNum,
           })
-          _stepWidgets.push({ w: t, isCode: true })
-          y += 42
-        } else {
-          if (s.n) {
-            createWidget(widget.TEXT, {
-              x: 10, y, w: 22, h: 20,
-              text: s.n + '.', text_size: 14, color: C.stepNum,
-            })
-          }
-          const t = createWidget(widget.TEXT, {
-            x: s.n ? 34 : 10, y, w: W - 44, h: 36,
-            text: s.t, text_size: 14,
-            color: s.n ? C.step : C.note,
-          })
-          _stepWidgets.push({ w: t, isCode: false, isNote: !s.n })
-          y += s.n ? 40 : 28
         }
+        const t = createWidget(widget.TEXT, {
+          x: 46, y, w: W - 58, h: 20,
+          text: s.t, text_size: 11, color: C.step,
+        })
+        _stepWidgets.push({ w: t, isCode: false, isNote: false })
+        y += 18
       })
 
+      const qrBoxY = y + 8
+      createWidget(widget.FILL_RECT, {
+        x: 0, y: qrBoxY, w: W, h: 276, color: 0x0B1020,
+      })
       createWidget(widget.TEXT, {
-        x: 0, y: 424, w: W, h: 18,
-        text: 'Works with Slides, Canva, PowerPoint',
-        text_size: 11, color: C.note,
+        x: 0, y: qrBoxY + 10, w: W, h: 14,
+        text: 'SCAN FOR ONE-COPY INSTALL',
+        text_size: 10, color: C.note,
+        align_h: align.CENTER_H,
+      })
+      _qrImage = createWidget(widget.IMG, {
+        x: 71, y: qrBoxY + 16, w: 248, h: 248,
+        src: 'qr_mac.png',
+      })
+      _qrCaption = createWidget(widget.TEXT, {
+        x: 32, y: qrBoxY + 252, w: W - 64, h: 14,
+        text: 'Phone opens a page with a Copy button',
+        text_size: 9, color: C.help,
         align_h: align.CENTER_H,
       })
     },
@@ -136,15 +164,36 @@ Page(
     setTab(platform) {
       this.state.platform = platform
       const isMac = platform === 'mac'
-
-      if (_tabMac) _tabMac.setProperty(prop.MORE, {
-        normal_color: isMac  ? C.tabActBg : C.tabInaBg,
-        color:        isMac  ? C.tabActTx : C.tabInaTx,
+      const x = isMac ? 6 : 200
+      if (_tabActiveBg) {
+        _tabActiveBg.setProperty(prop.MORE, { x })
+      }
+      if (_tabMacIndicator) {
+        _tabMacIndicator.setProperty(prop.MORE, {
+          color: isMac ? C.tabActBg : C.tabInaBg,
+        })
+      }
+      if (_tabWinIndicator) {
+        _tabWinIndicator.setProperty(prop.MORE, {
+          color: isMac ? C.tabInaBg : C.tabActBg,
+        })
+      }
+      if (_tabMacText) _tabMacText.setProperty(prop.MORE, {
+        color: isMac ? C.tabActTx : C.tabInaTx,
       })
-      if (_tabWin) _tabWin.setProperty(prop.MORE, {
-        normal_color: !isMac ? C.tabActBg : C.tabInaBg,
-        color:        !isMac ? C.tabActTx : C.tabInaTx,
+      if (_tabWinText) _tabWinText.setProperty(prop.MORE, {
+        color: isMac ? C.tabInaTx : C.tabActTx,
       })
+      if (_qrImage) {
+        _qrImage.setProperty(prop.MORE, { src: isMac ? 'qr_mac.png' : 'qr_win.png' })
+      }
+      if (_qrCaption) {
+        _qrCaption.setProperty(prop.MORE, {
+          text: isMac
+            ? 'Phone opens a Mac page with a Copy button'
+            : 'Phone opens a Windows page with a Copy button',
+        })
+      }
 
       const steps = isMac ? MAC_STEPS : WIN_STEPS
       _stepWidgets.forEach(function(ref, i) {
@@ -160,6 +209,13 @@ Page(
     onDestroy() {
       _tabMac = null
       _tabWin = null
+      _tabActiveBg = null
+      _tabMacIndicator = null
+      _tabWinIndicator = null
+      _tabMacText = null
+      _tabWinText = null
+      _qrImage = null
+      _qrCaption = null
       _stepWidgets = []
       this.log('Tutorial onDestroy')
     },

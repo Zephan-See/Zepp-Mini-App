@@ -2,7 +2,7 @@
 // SlideFlipper v2.0 — Zephan
 import { BasePage } from '@zeppos/zml/base-page'
 import { createWidget, widget, prop, align } from '@zos/ui'
-import { pop } from '@zos/router'
+import { push } from '@zos/router'
 import { localStorage } from '@zos/storage'
 import { vibrate } from '@zos/interaction'
 
@@ -11,7 +11,9 @@ const TOP = 60
 
 const C = {
   bg:         0x000000,
+  header:     0x0A0E1A,
   title:      0xFFFFFF,
+  subtitle:   0x7380A6,
   backBg:     0x111122,
   backPress:  0x222244,
   back:       0x555577,
@@ -47,32 +49,39 @@ Page(
     build() {
       const self = this
       createWidget(widget.FILL_RECT, { x: 0, y: 0, w: W, h: 450, color: C.bg })
+      createWidget(widget.FILL_RECT, { x: 0, y: 0, w: W, h: 92, color: C.header })
 
-      // Header: BACK + title
+      // Title TEXT first (bottom of stack)
+      createWidget(widget.TEXT, {
+        x: 0, y: TOP - 2, w: W, h: 28,
+        text: 'FLIPPER', text_size: 20, color: C.title,
+        align_h: align.CENTER_H,
+      })
+      createWidget(widget.TEXT, {
+        x: 0, y: TOP + 22, w: W, h: 16,
+        text: 'Presentation + media control', text_size: 11, color: C.subtitle,
+        align_h: align.CENTER_H,
+      })
+      // BACK BUTTON after title — sits on top, intercepts touches in its area
       createWidget(widget.BUTTON, {
         x: 6, y: TOP, w: 60, h: 30,
         normal_color: C.backBg, press_color: C.backPress,
         text: 'BACK', text_size: 13, color: C.back,
-        click_func() { pop() },
-      })
-      createWidget(widget.TEXT, {
-        x: 0, y: TOP + 2, w: W, h: 28,
-        text: 'FLIPPER', text_size: 20, color: C.title,
-        align_h: align.CENTER_H,
+        click_func() { push({ url: 'page/home/index.page' }) },
       })
 
-      // Status row
+      // Status
       _dot = createWidget(widget.FILL_RECT, {
-        x: 136, y: TOP + 38, w: 8, h: 8, radius: 4, color: C.dotBg,
+        x: 128, y: TOP + 50, w: 8, h: 8, radius: 4, color: C.dotBg,
       })
       _statusTxt = createWidget(widget.TEXT, {
-        x: 150, y: TOP + 34, w: 180, h: 20,
+        x: 142, y: TOP + 46, w: 180, h: 20,
         text: 'READY', text_size: 13, color: C.statusRdy,
       })
 
-      // PREV / NEXT — large buttons
-      const bigY = TOP + 54
-      const bigH = 190
+      // PREV / NEXT
+      const bigY = TOP + 68
+      const bigH = 182
       createWidget(widget.BUTTON, {
         x: 6, y: bigY, w: 186, h: bigH,
         normal_color: C.prevBg, press_color: C.prevPress,
@@ -88,7 +97,7 @@ Page(
 
       // VOL- / PLAY / VOL+
       const rowY = bigY + bigH + 6
-      const rowH = 66
+      const rowH = 62
       createWidget(widget.BUTTON, {
         x: 6, y: rowY, w: 118, h: rowH,
         normal_color: C.rowBg, press_color: C.rowPress,
@@ -108,10 +117,9 @@ Page(
         click_func() { self.sendCmd('volup') },
       })
 
-      // BLANK SCREEN
-      const blankY = rowY + rowH + 6
+      // BLANK
       createWidget(widget.BUTTON, {
-        x: 6, y: blankY, w: W - 12, h: 56,
+        x: 6, y: rowY + rowH + 6, w: W - 12, h: 56,
         normal_color: C.blankBg, press_color: C.blankPress,
         text: 'BLANK SCREEN', text_size: 20, color: C.btnTxt,
         click_func() { self.sendCmd('blank') },
@@ -120,7 +128,6 @@ Page(
 
     sendCmd(action) {
       try { vibrate({ type: 'short' }) } catch (e) {}
-
       if (_dot)       _dot.setProperty(prop.MORE, { color: C.statusSend })
       if (_statusTxt) _statusTxt.setProperty(prop.MORE, { text: 'SENDING...', color: C.statusSend })
 
@@ -150,6 +157,11 @@ Page(
       _dot = null
       _statusTxt = null
       this.log('Flipper onDestroy')
+    },
+
+    onResume() {
+      const saved = localStorage.getItem('currentIP')
+      if (saved) this.state.ip = saved
     },
   }),
 )

@@ -13,7 +13,8 @@
     "description": "Wireless presentation remote for Google Slides, Canva, PowerPoint"
   },
   "permissions": [
-    "device:os.bg.network"
+    "device:os.bg.network",
+    "device:os.local_storage"
   ],
   "runtime": {
     "apiVersion": {

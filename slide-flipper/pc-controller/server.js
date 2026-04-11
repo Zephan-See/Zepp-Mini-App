@@ -54,10 +54,10 @@ const ACTIONS = {
   },
   play: {
     label: 'PLAY',
-    // F5 starts slideshow in PowerPoint/LibreOffice; Enter resumes in Keynote
-    mac:   `osascript -e 'tell application "System Events" to key code 96'`,             // F5
-    win:   `powershell -command "$s=New-Object -ComObject WScript.Shell; $s.SendKeys('{F5}')"`,
-    linux: `xdotool key F5`,
+    // Space is a more universal play/pause key for videos and web players
+    mac:   `osascript -e 'tell application "System Events" to key code 49'`,             // Space
+    win:   `powershell -command "$s=New-Object -ComObject WScript.Shell; $s.SendKeys(' ')"`,
+    linux: `xdotool key space`,
   },
   blank: {
     label: 'BLANK',
@@ -68,13 +68,13 @@ const ACTIONS = {
   },
   volup: {
     label: 'VOL+',
-    mac:   `osascript -e 'tell application "System Events" to key code 72'`,             // Volume Up
+    mac:   `osascript -e 'set v to output volume of (get volume settings)' -e 'set v to v + 6' -e 'if v > 100 then set v to 100' -e 'set volume output volume v'`,
     win:   `powershell -command "$s=New-Object -ComObject WScript.Shell; $s.SendKeys('{VOLUME_UP}')"`,
     linux: `xdotool key XF86AudioRaiseVolume`,
   },
   voldown: {
     label: 'VOL-',
-    mac:   `osascript -e 'tell application "System Events" to key code 73'`,             // Volume Down
+    mac:   `osascript -e 'set v to output volume of (get volume settings)' -e 'set v to v - 6' -e 'if v < 0 then set v to 0' -e 'set volume output volume v'`,
     win:   `powershell -command "$s=New-Object -ComObject WScript.Shell; $s.SendKeys('{VOLUME_DOWN}')"`,
     linux: `xdotool key XF86AudioLowerVolume`,
   },

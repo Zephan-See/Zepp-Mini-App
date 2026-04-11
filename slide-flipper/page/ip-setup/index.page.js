@@ -1,11 +1,12 @@
-// page/ip-setup/index.page.js — IP Address Configuration
+// page/ip-setup/index.page.js — IP Address Setup
 // SlideFlipper v2.0 — Zephan
 //
-// Layout:
-//   [Title + BACK]
-//   [History: up to 5 saved IPs as tap-able chips]
-//   [IP display: 4 tappable octet boxes]
-//   [4x3 number keypad: 1-9, DEL, 0, OK]
+// Phone-dialer UX:
+//   • Tap a number → immediately appears in the active box
+//   • After 3 digits → automatically jumps to next box
+//   • DEL → removes last digit; if box empty, goes back to previous box
+//   • Tap a box → switch to editing that box
+//   • SAVE → saves full IP and returns to menu
 //
 import { BasePage } from '@zeppos/zml/base-page'
 import { createWidget, widget, prop, align } from '@zos/ui'
@@ -13,58 +14,48 @@ import { pop } from '@zos/router'
 import { localStorage } from '@zos/storage'
 import { vibrate } from '@zos/interaction'
 
-const W = 390
-const H = 450
+const W   = 390
+const TOP = 65
 
 const C = {
-  bg:           0x000000,
-  title:        0xFFFFFF,
-  back:         0x555577,
-  octetBg:      0x111133,
-  octetSel:     0x0A3870,
-  octetText:    0xFFFFFF,
-  octetDot:     0x555566,
-  keyBg:        0x111122,
-  keyPress:     0x222244,
-  keyDel:       0x3A1020,
-  keyDelPress:  0x6A2040,
-  keyOk:        0x0A5C30,
-  keyOkPress:   0x18A050,
-  keyText:      0xFFFFFF,
-  historyBg:    0x0D0D1A,
-  historyText:  0x8888BB,
-  historyAct:   0x4D94FF,
-  preview:      0x4D94FF,
-  label:        0x555577,
+  bg:         0x000000,
+  title:      0xFFFFFF,
+  back:       0x6666AA,
+  backBg:     0x111130,
+  boxInact:   0x111133,
+  boxActive:  0x0A3870,
+  boxText:    0xFFFFFF,
+  boxCursor:  0x4D94FF,
+  dot:        0x445566,
+  keyBg:      0x111122,
+  keyDel:     0x3A1020,
+  keySave:    0x0A5C30,
+  keyTxt:     0xFFFFFF,
+  histBg:     0x0A0A1A,
+  histTxt:    0x6688BB,
 }
 
-// Widget refs for dynamic updates
-let _octetWidgets = []   // background rects
-let _octetTexts   = []   // text labels
-let _previewText  = null // current input preview
+// Widget refs
+let _boxBgs   = []   // 4 FILL_RECT backgrounds
+let _boxTexts = []   // 4 TEXT value labels
 
 Page(
   BasePage({
     name: 'ip-setup',
-
     state: {
-      octets:       ['192', '168', '1', '100'],
-      selected:     -1,      // which octet box is active (-1 = none)
-      currentInput: '',      // digits being typed
-      history:      [],      // array of IP strings, max 5
+      octets:      ['192', '168', '1', '100'],
+      activeIdx:   0,
+      inputBuffer: '',
+      history:     [],
     },
 
     onInit() {
       this.log('IP Setup onInit')
-
-      // Load saved IP
       const savedIP = localStorage.getItem('currentIP')
       if (savedIP) {
         const parts = savedIP.split('.')
         if (parts.length === 4) this.state.octets = parts
       }
-
-      // Load history
       const hist = localStorage.getItem('ipHistory')
       if (hist) {
         try { this.state.history = JSON.parse(hist) } catch (e) {}
@@ -75,254 +66,232 @@ Page(
       this.log('IP Setup build')
       const self = this
 
-      createWidget(widget.FILL_RECT, { x: 0, y: 0, w: W, h: H, color: C.bg })
+      createWidget(widget.FILL_RECT, { x: 0, y: 0, w: W, h: 450, color: C.bg })
 
-      // ── Header ───────────────────────────────────────────
+      // ── Header ────────────────────────────────────────────
       createWidget(widget.TEXT, {
-        x: 0, y: 10, w: W, h: 30,
-        text: 'IP SETUP',
-        text_size: 20,
-        color: C.title,
+        x: 0, y: TOP, w: W, h: 32,
+        text: 'IP SETUP', text_size: 20, color: C.title,
         align_h: align.CENTER_H,
       })
-      createWidget(widget.BUTTON, {
-        x: 6, y: 8, w: 52, h: 32,
-        normal_color: 0x111122, press_color: 0x222244,
-        text: 'BACK', text_size: 12, color: C.back,
+      createWidget(widget.FILL_RECT, { x: 6, y: TOP, w: 64, h: 32, radius: 10, color: C.backBg })
+      createWidget(widget.TEXT, {
+        x: 6, y: TOP, w: 64, h: 32,
+        text: '< BACK', text_size: 13, color: C.back,
+        align_h: align.CENTER_H, align_v: align.CENTER_V,
         click_func() { self.saveAndExit() },
       })
 
-      // ── History chips (max 5 IPs) ─────────────────────────
-      createWidget(widget.TEXT, {
-        x: 8, y: 46, w: 80, h: 18,
-        text: 'RECENT:', text_size: 11, color: C.label,
-      })
-      this.buildHistoryChips()
+      // ── 4 Octet boxes ─────────────────────────────────────
+      // Box: w=78, gap=10 (includes dot). Total=4*78+3*10=342. margin=24
+      const BOX_W = 78, BOX_H = 58, BOX_Y = TOP + 40
+      const BOX_GAP = 10
+      const BOX_LEFT = Math.floor((W - (4 * BOX_W + 3 * BOX_GAP)) / 2)
 
-      // ── IP Octet boxes ────────────────────────────────────
-      createWidget(widget.TEXT, {
-        x: 8, y: 112, w: 60, h: 18,
-        text: 'IP:', text_size: 12, color: C.label,
-      })
-
-      // 4 boxes: each ~82px wide, gap 6px
-      // total = 4*82 + 3*6 = 346, left margin = (390-346)/2 = 22
-      const boxW = 82, boxH = 46, boxY = 108, gap = 6
-      const startX = (W - (4 * boxW + 3 * gap)) / 2
-
-      _octetWidgets = []
-      _octetTexts   = []
+      _boxBgs   = []
+      _boxTexts = []
 
       for (let i = 0; i < 4; i++) {
-        const bx = startX + i * (boxW + gap)
+        const bx = BOX_LEFT + i * (BOX_W + BOX_GAP)
 
         const bg = createWidget(widget.FILL_RECT, {
-          x: bx, y: boxY, w: boxW, h: boxH,
-          color: C.octetBg,
+          x: bx, y: BOX_Y, w: BOX_W, h: BOX_H,
+          radius: 12,
+          color: i === 0 ? C.boxActive : C.boxInact,
         })
         const txt = createWidget(widget.TEXT, {
-          x: bx, y: boxY + 10, w: boxW, h: 28,
+          x: bx, y: BOX_Y, w: BOX_W, h: BOX_H,
           text: self.state.octets[i],
-          text_size: 20,
-          color: C.octetText,
-          align_h: align.CENTER_H,
+          text_size: 26, color: C.boxText,
+          align_h: align.CENTER_H, align_v: align.CENTER_V,
+        })
+
+        // Tap box → switch active
+        const idx = i
+        createWidget(widget.FILL_RECT, {
+          x: bx, y: BOX_Y, w: BOX_W, h: BOX_H,
+          radius: 12, color: 0x000001,   // near-black transparent overlay
+          click_func() { self.selectBox(idx) },
         })
 
         // Dot separator (not after last box)
         if (i < 3) {
           createWidget(widget.TEXT, {
-            x: bx + boxW, y: boxY + 12, w: gap + 2, h: 24,
-            text: '.', text_size: 20, color: C.octetDot,
+            x: bx + BOX_W, y: BOX_Y + BOX_H / 2 - 10, w: BOX_GAP, h: 20,
+            text: '.', text_size: 20, color: C.dot,
             align_h: align.CENTER_H,
           })
         }
 
-        // Make box tappable via invisible BUTTON overlay
-        const idx = i
-        createWidget(widget.BUTTON, {
-          x: bx, y: boxY, w: boxW, h: boxH,
-          normal_color: 0x00000000,
-          press_color:  0x0A387020,
-          text: '', text_size: 1, color: 0x00000000,
-          click_func() { self.selectOctet(idx) },
-        })
-
-        _octetWidgets.push(bg)
-        _octetTexts.push(txt)
+        _boxBgs.push(bg)
+        _boxTexts.push(txt)
       }
 
-      // ── Input preview ─────────────────────────────────────
-      _previewText = createWidget(widget.TEXT, {
-        x: 0, y: 160, w: W, h: 22,
-        text: 'Tap a group above to edit',
-        text_size: 13,
-        color: C.label,
-        align_h: align.CENTER_H,
-      })
+      // ── History chips ─────────────────────────────────────
+      const HIST_Y = BOX_Y + BOX_H + 8
+      const hist = this.state.history
+      if (hist.length > 0) {
+        let hx = 8
+        hist.slice(0, 4).forEach((ip) => {
+          const chipW = ip.length * 8 + 16
+          createWidget(widget.FILL_RECT, { x: hx, y: HIST_Y, w: chipW, h: 24, radius: 8, color: C.histBg })
+          createWidget(widget.TEXT, {
+            x: hx, y: HIST_Y, w: chipW, h: 24,
+            text: ip, text_size: 12, color: C.histTxt,
+            align_h: align.CENTER_H, align_v: align.CENTER_V,
+            click_func() { self.loadIP(ip) },
+          })
+          hx += chipW + 6
+        })
+      }
 
-      // ── 4x3 Number Keypad ─────────────────────────────────
-      const keys = [
-        ['1','2','3'],
-        ['4','5','6'],
-        ['7','8','9'],
-        ['DEL','0','OK'],
+      // ── 4 x 3 Keypad ──────────────────────────────────────
+      // Buttons: w=118, gap=8, margin=12
+      const KEY_W = 118, KEY_H = 56, KEY_GAP = 8, KEY_MARGIN = 12
+      const KEY_Y = HIST_Y + 32   // starts below history
+
+      const rows = [
+        ['1', '2', '3'],
+        ['4', '5', '6'],
+        ['7', '8', '9'],
+        ['DEL', '0', 'SAVE'],
       ]
-      const kW = 124, kH = 60, kGap = 4
-      const kStartX = (W - (3 * kW + 2 * kGap)) / 2
-      const kStartY = 186
 
-      keys.forEach((row, r) => {
+      rows.forEach((row, r) => {
+        const ky = KEY_Y + r * (KEY_H + KEY_GAP)
         row.forEach((key, c) => {
-          const kx = kStartX + c * (kW + kGap)
-          const ky = kStartY + r * (kH + kGap)
+          const kx = KEY_MARGIN + c * (KEY_W + KEY_GAP)
 
-          let bg = C.keyBg, press = C.keyPress
-          if (key === 'DEL') { bg = C.keyDel;  press = C.keyDelPress }
-          if (key === 'OK')  { bg = C.keyOk;   press = C.keyOkPress  }
+          let bg = C.keyBg
+          if (key === 'DEL')  bg = C.keyDel
+          if (key === 'SAVE') bg = C.keySave
+          const sz = (key === 'DEL' || key === 'SAVE') ? 18 : 36
 
-          createWidget(widget.BUTTON, {
-            x: kx, y: ky, w: kW, h: kH,
-            normal_color: bg, press_color: press,
-            text: key, text_size: key === 'DEL' || key === 'OK' ? 18 : 24,
-            color: C.keyText,
+          // Rounded key: FILL_RECT (visual) + TEXT (click)
+          createWidget(widget.FILL_RECT, { x: kx, y: ky, w: KEY_W, h: KEY_H, radius: 14, color: bg })
+          createWidget(widget.TEXT, {
+            x: kx, y: ky, w: KEY_W, h: KEY_H,
+            text: key, text_size: sz, color: C.keyTxt,
+            align_h: align.CENTER_H, align_v: align.CENTER_V,
             click_func() { self.keyPress(key) },
           })
         })
       })
     },
 
-    buildHistoryChips() {
-      // Show up to 5 recent IPs as small tappable labels
-      const hist = this.state.history
-      const self = this
-      const chipH = 24, chipY = 46, startX = 76
+    // ── Logic ───────────────────────────────────────────────
 
-      if (hist.length === 0) {
-        createWidget(widget.TEXT, {
-          x: startX, y: chipY, w: W - startX - 8, h: chipH,
-          text: 'No history yet',
-          text_size: 12, color: C.historyText,
-        })
-        return
-      }
-
-      // Show up to 5 chips - they'll overflow to next line if needed
-      // Simple approach: show horizontally, truncate if too many
-      let x = startX
-      hist.slice(0, 5).forEach((ip, i) => {
-        const chipW = Math.min(ip.length * 9 + 12, 130)
-        createWidget(widget.BUTTON, {
-          x: x, y: chipY, w: chipW, h: chipH,
-          normal_color: 0x111133, press_color: 0x0A3870,
-          text: ip, text_size: 11, color: C.historyText,
-          click_func() { self.loadIP(ip) },
-        })
-        x += chipW + 6
-      })
-    },
-
-    selectOctet(idx) {
-      // Deselect previous
-      if (this.state.selected >= 0 && _octetWidgets[this.state.selected]) {
-        _octetWidgets[this.state.selected].setProperty(prop.MORE, { color: C.octetBg })
-      }
-      // Select new
-      this.state.selected = idx
-      this.state.currentInput = ''
-      if (_octetWidgets[idx]) {
-        _octetWidgets[idx].setProperty(prop.MORE, { color: C.octetSel })
-      }
-      if (_previewText) {
-        _previewText.setProperty(prop.MORE, {
-          text: 'Group ' + (idx + 1) + ': type new value',
-          color: C.preview,
-        })
-      }
+    selectBox(idx) {
+      if (idx === this.state.activeIdx) return
+      this.commitCurrent()
+      this.state.activeIdx   = idx
+      this.state.inputBuffer = ''
+      this.refreshBoxes()
       try { vibrate({ type: 'short' }) } catch (e) {}
     },
 
     keyPress(key) {
-      if (this.state.selected < 0) return
       try { vibrate({ type: 'short' }) } catch (e) {}
 
-      const idx = this.state.selected
-
       if (key === 'DEL') {
-        this.state.currentInput = this.state.currentInput.slice(0, -1)
-        const display = this.state.currentInput || this.state.octets[idx]
-        if (_octetTexts[idx]) _octetTexts[idx].setProperty(prop.MORE, { text: display })
-        if (_previewText) _previewText.setProperty(prop.MORE, {
-          text: this.state.currentInput ? 'Typing: ' + this.state.currentInput : 'Deleted',
-          color: C.preview,
-        })
+        this.delPress()
         return
       }
-
-      if (key === 'OK') {
-        const val = parseInt(this.state.currentInput || this.state.octets[idx], 10)
-        if (!isNaN(val) && val >= 0 && val <= 255) {
-          this.state.octets[idx] = String(val)
-          if (_octetTexts[idx]) _octetTexts[idx].setProperty(prop.MORE, { text: String(val) })
-        }
-        // Deselect and move to next
-        if (_octetWidgets[idx]) _octetWidgets[idx].setProperty(prop.MORE, { color: C.octetBg })
-        const nextIdx = idx < 3 ? idx + 1 : -1
-        this.state.selected = nextIdx
-        this.state.currentInput = ''
-        if (nextIdx >= 0) {
-          this.selectOctet(nextIdx)
-        } else {
-          if (_previewText) _previewText.setProperty(prop.MORE, {
-            text: 'Tap BACK to save: ' + this.state.octets.join('.'),
-            color: C.preview,
-          })
-        }
+      if (key === 'SAVE') {
+        this.saveAndExit()
         return
       }
+      // Digit
+      this.digitPress(key)
+    },
 
-      // Digit key — max 3 digits
-      if (this.state.currentInput.length >= 3) return
-      this.state.currentInput += key
-      const preview = this.state.currentInput
-      if (_octetTexts[idx]) _octetTexts[idx].setProperty(prop.MORE, { text: preview })
-      if (_previewText) _previewText.setProperty(prop.MORE, {
-        text: 'Typing: ' + preview,
-        color: C.preview,
-      })
+    digitPress(d) {
+      if (this.state.inputBuffer.length >= 3) return
+
+      this.state.inputBuffer += d
+      const idx = this.state.activeIdx
+
+      // Update box display immediately (phone-dialer feel)
+      if (_boxTexts[idx]) {
+        _boxTexts[idx].setProperty(prop.MORE, { text: this.state.inputBuffer })
+      }
+
+      // Auto-advance after 3 digits
+      if (this.state.inputBuffer.length === 3) {
+        this.commitCurrent()
+        if (this.state.activeIdx < 3) {
+          this.state.activeIdx++
+          this.state.inputBuffer = ''
+          this.refreshBoxes()
+        }
+      }
+    },
+
+    delPress() {
+      if (this.state.inputBuffer.length > 0) {
+        // Remove last digit
+        this.state.inputBuffer = this.state.inputBuffer.slice(0, -1)
+        const idx = this.state.activeIdx
+        const display = this.state.inputBuffer || (this.state.octets[idx] || '0')
+        if (_boxTexts[idx]) _boxTexts[idx].setProperty(prop.MORE, { text: display })
+      } else if (this.state.activeIdx > 0) {
+        // Jump to previous box and clear it
+        this.state.activeIdx--
+        this.state.octets[this.state.activeIdx] = ''
+        this.state.inputBuffer = ''
+        this.refreshBoxes()
+      }
+    },
+
+    commitCurrent() {
+      const buf = this.state.inputBuffer
+      const idx = this.state.activeIdx
+      if (buf !== '') {
+        let val = parseInt(buf, 10)
+        if (isNaN(val) || val < 0) val = 0
+        if (val > 255) val = 255
+        this.state.octets[idx] = String(val)
+        this.state.inputBuffer = ''
+      }
+    },
+
+    refreshBoxes() {
+      for (let i = 0; i < 4; i++) {
+        const isActive = i === this.state.activeIdx
+        if (_boxBgs[i]) {
+          _boxBgs[i].setProperty(prop.MORE, { color: isActive ? C.boxActive : C.boxInact })
+        }
+        if (_boxTexts[i]) {
+          const showBuf = isActive && this.state.inputBuffer !== ''
+          const text = showBuf
+            ? this.state.inputBuffer
+            : (this.state.octets[i] || (isActive ? '_' : '0'))
+          _boxTexts[i].setProperty(prop.MORE, { text })
+        }
+      }
     },
 
     loadIP(ipStr) {
       const parts = ipStr.split('.')
       if (parts.length !== 4) return
-      this.state.octets = parts
-      this.state.selected = -1
-      this.state.currentInput = ''
-      parts.forEach((v, i) => {
-        if (_octetTexts[i]) _octetTexts[i].setProperty(prop.MORE, { text: v })
-        if (_octetWidgets[i]) _octetWidgets[i].setProperty(prop.MORE, { color: C.octetBg })
-      })
-      if (_previewText) _previewText.setProperty(prop.MORE, {
-        text: 'Loaded: ' + ipStr,
-        color: C.preview,
-      })
+      this.state.octets      = parts
+      this.state.activeIdx   = 0
+      this.state.inputBuffer = ''
+      this.refreshBoxes()
       try { vibrate({ type: 'short' }) } catch (e) {}
     },
 
     saveAndExit() {
-      // Commit any in-progress octet
-      const idx = this.state.selected
-      if (idx >= 0 && this.state.currentInput) {
-        const val = parseInt(this.state.currentInput, 10)
-        if (!isNaN(val) && val >= 0 && val <= 255) {
-          this.state.octets[idx] = String(val)
-        }
-      }
-
-      const ip = this.state.octets.join('.')
+      this.commitCurrent()
+      const octets = this.state.octets.map((o) => {
+        const v = parseInt(o, 10)
+        if (isNaN(v) || v < 0) return '0'
+        return String(Math.min(v, 255))
+      })
+      const ip = octets.join('.')
       localStorage.setItem('currentIP', ip)
 
-      // Update history (max 5, newest first, no duplicates)
-      let hist = this.state.history.filter(h => h !== ip)
+      let hist = (this.state.history || []).filter(h => h !== ip)
       hist.unshift(ip)
       if (hist.length > 5) hist = hist.slice(0, 5)
       localStorage.setItem('ipHistory', JSON.stringify(hist))
@@ -331,9 +300,8 @@ Page(
     },
 
     onDestroy() {
-      _octetWidgets = []
-      _octetTexts   = []
-      _previewText  = null
+      _boxBgs   = []
+      _boxTexts = []
       this.log('IP Setup onDestroy')
     },
   }),

@@ -1,11 +1,12 @@
 #!/bin/bash
 # ═══════════════════════════════════════════════════════
-#  SLIDE FLIPPER — One-Click Launcher
+#  SLIDE FLIPPER v2.0 — One-Click Launcher
 #  Double-click this file to:
 #    1. Auto-detect your Mac's current IP address
-#    2. Update PC_IP in app-side/index.js
-#    3. Start PC Controller (node server.js) in a new window
-#    4. Build & show QR code → scan with Zepp app
+#    2. Start PC Controller (node server.js) in a new window
+#    3. Build & show QR code → scan with Zepp app
+#
+#  Then open the watch app → IP SETUP → enter the IP shown.
 # ═══════════════════════════════════════════════════════
 
 PROJECT="/Users/zephan/Downloads/PPT Pointer ZEPP Apps/slide-flipper"
@@ -13,12 +14,12 @@ cd "$PROJECT"
 
 echo ""
 echo "╔══════════════════════════════════════════╗"
-echo "║      SLIDE FLIPPER — One-Click Setup     ║"
+echo "║    SLIDE FLIPPER v2.0 — One-Click Setup  ║"
 echo "╚══════════════════════════════════════════╝"
 echo ""
 
 # ── STEP 1: Auto-detect IP ────────────────────────────
-echo "[ 1/4 ] Detecting IP address..."
+echo "[ 1/3 ] Detecting IP address..."
 
 LOCAL_IP=$(ipconfig getifaddr en0 2>/dev/null)
 if [ -z "$LOCAL_IP" ]; then
@@ -35,24 +36,22 @@ if [ -z "$LOCAL_IP" ]; then
   exit 1
 fi
 
-echo "  ✓  Your IP: $LOCAL_IP"
-
-# ── STEP 2: Update PC_IP in app-side/index.js ────────
 echo ""
-echo "[ 2/4 ] Updating PC_IP in app-side/index.js..."
-
-sed -i '' "s/const PC_IP   = '[^']*'/const PC_IP   = '$LOCAL_IP'/" "$PROJECT/app-side/index.js"
-
-echo "  ✓  PC_IP set to: $LOCAL_IP"
-
-# ── STEP 3: Start server.js in a new Terminal window ─
+echo "  ┌─────────────────────────────────────────┐"
+echo "  │  Your Mac IP:  $LOCAL_IP"
+echo "  │"
+echo "  │  → Enter this in the watch:"
+echo "  │    Open App → IP SETUP → type this IP"
+echo "  └─────────────────────────────────────────┘"
 echo ""
-echo "[ 3/4 ] Starting PC Controller server..."
+
+# ── STEP 2: Start server.js in a new Terminal window ─
+echo "[ 2/3 ] Starting PC Controller server..."
 
 osascript <<EOF
 tell application "Terminal"
   activate
-  set newTab to do script "echo '' && echo '╔══════════════════════════════════════════╗' && echo '║     SLIDE FLIPPER — PC Controller        ║' && echo '╚══════════════════════════════════════════╝' && echo '' && cd '$PROJECT/pc-controller' && node server.js"
+  set newTab to do script "echo '' && echo '╔══════════════════════════════════════════╗' && echo '║     SLIDE FLIPPER v2.0 — PC Controller   ║' && echo '╚══════════════════════════════════════════╝' && echo '' && cd '$PROJECT/pc-controller' && node server.js"
   set current settings of newTab to settings set "Pro"
 end tell
 EOF
@@ -60,18 +59,12 @@ EOF
 echo "  ✓  Server started in new Terminal window"
 sleep 1
 
-# ── STEP 4: Set up app icons ──────────────────────────
+# ── STEP 3: Build & QR code ───────────────────────────
 echo ""
-echo "[ 4/4 ] Building app & generating QR code..."
+echo "[ 3/3 ] Building app & generating QR code..."
 echo ""
 
-mkdir -p assets/common.r assets/common.s assets/common.b
-
-ICON_B64="iVBORw0KGgoAAAANSUhEUgAAAPgAAAD4CAIAAABOs7xcAAAHn0lEQVR4nO3cQW4cRxBEUS4FwkvBZ/BGF/Jah9WxLGCEgSBLZLOrKiMy4wP/ADOMx0St5uX18xei8b3IPwFRQUCniIBOEQGdIgI6RQR0igjoFBHQKSKgU0RAp4iAThEBnSICOkUEdIoI6BQR0Cmi/wCymP9qPEyn2wAAAABJRU5ErkJggg=="
-
-echo "$ICON_B64" | base64 -d > assets/common.r/icon.png
-echo "$ICON_B64" | base64 -d > assets/common.s/icon.png
-echo "$ICON_B64" | base64 -d > assets/common.b/icon.png
+rm -rf "$PROJECT/dist"
 
 echo "═══════════════════════════════════════════════════════"
 echo ""
@@ -87,8 +80,11 @@ echo ""
 
 echo ""
 echo "═══════════════════════════════════════════════════════"
-echo "  Done! Check the other Terminal window to see"
-echo "  incoming commands from your watch."
+echo "  Watch app installed! Now:"
+echo "  1. Open Slide Flipper on your watch"
+echo "  2. Go to IP SETUP"
+echo "  3. Enter: $LOCAL_IP"
+echo "  4. Go to FLIPPER — start presenting!"
 echo "═══════════════════════════════════════════════════════"
 echo ""
 read -n 1 -p "Press any key to close..."

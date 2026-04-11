@@ -6,31 +6,38 @@ import { pop } from '@zos/router'
 import { localStorage } from '@zos/storage'
 import { vibrate } from '@zos/interaction'
 
-const W = 390
-const H = 450
+const W   = 390
+const TOP = 65   // safe area — clears the watch status bar
 
 const C = {
   bg:         0x000000,
   title:      0xFFFFFF,
-  back:       0x555577,
+  back:       0x6666AA,
+  backBg:     0x111130,
   prevBg:     0x0A3870,
-  prevPress:  0x1A60C0,
   nextBg:     0x0A5C30,
-  nextPress:  0x18A050,
-  btnText:    0xFFFFFF,
-  rowBg:      0x1A1030,
-  rowPress:   0x2A2050,
+  rowBg:      0x1A1032,
   blankBg:    0x4A1A1A,
-  blankPress: 0x7A2A2A,
+  btnTxt:     0xFFFFFF,
+  dotBg:      0x333344,
   statusRdy:  0x00CC66,
   statusSend: 0x4D94FF,
-  statusOk:   0x4D94FF,
   statusErr:  0xFF4444,
-  dotBg:      0x333344,
 }
 
 let _dot = null
 let _statusTxt = null
+
+// Rounded button: FILL_RECT (visual, radius) + TEXT (click target)
+function roundBtn(x, y, w, h, label, sz, bgColor, fn) {
+  createWidget(widget.FILL_RECT, { x, y, w, h, radius: 14, color: bgColor })
+  createWidget(widget.TEXT, {
+    x, y, w, h,
+    text: label, text_size: sz, color: C.btnTxt,
+    align_h: align.CENTER_H, align_v: align.CENTER_V,
+    click_func: fn,
+  })
+}
 
 Page(
   BasePage({
@@ -44,111 +51,54 @@ Page(
     },
 
     build() {
-      this.log('Flipper build')
       const self = this
+      createWidget(widget.FILL_RECT, { x: 0, y: 0, w: W, h: 450, color: C.bg })
 
-      createWidget(widget.FILL_RECT, { x: 0, y: 0, w: W, h: H, color: C.bg })
-
-      // Header: title + back
+      // ── Header ────────────────────────────────────────────
       createWidget(widget.TEXT, {
-        x: 0, y: 10, w: W, h: 30,
-        text: 'FLIPPER',
-        text_size: 20,
-        color: C.title,
+        x: 0, y: TOP, w: W, h: 32,
+        text: 'FLIPPER', text_size: 20, color: C.title,
         align_h: align.CENTER_H,
       })
-      createWidget(widget.BUTTON, {
-        x: 6, y: 8, w: 52, h: 32,
-        normal_color: 0x111122,
-        press_color: 0x222244,
-        text: 'BACK',
-        text_size: 12,
-        color: C.back,
+      // BACK button (rounded)
+      createWidget(widget.FILL_RECT, { x: 6, y: TOP, w: 64, h: 32, radius: 10, color: C.backBg })
+      createWidget(widget.TEXT, {
+        x: 6, y: TOP, w: 64, h: 32,
+        text: '< BACK', text_size: 13, color: C.back,
+        align_h: align.CENTER_H, align_v: align.CENTER_V,
         click_func() { pop() },
       })
 
-      // Status row
+      // ── Status row ────────────────────────────────────────
       _dot = createWidget(widget.FILL_RECT, {
-        x: 100, y: 46, w: 10, h: 10, radius: 5,
-        color: C.dotBg,
+        x: 136, y: TOP + 40, w: 8, h: 8, radius: 4, color: C.dotBg,
       })
       _statusTxt = createWidget(widget.TEXT, {
-        x: 116, y: 42, w: 180, h: 20,
-        text: 'READY',
-        text_size: 14,
-        color: C.statusRdy,
+        x: 150, y: TOP + 36, w: 180, h: 20,
+        text: 'READY', text_size: 13, color: C.statusRdy,
       })
 
-      // ── PREV / NEXT  (large buttons) ─────────────────────
-      createWidget(widget.BUTTON, {
-        x: 6, y: 68, w: 185, h: 212,
-        normal_color: C.prevBg,
-        press_color:  C.prevPress,
-        text: 'PREV',
-        text_size: 36,
-        color: C.btnText,
-        click_func() { self.sendCmd('prev') },
-      })
-      createWidget(widget.BUTTON, {
-        x: 199, y: 68, w: 185, h: 212,
-        normal_color: C.nextBg,
-        press_color:  C.nextPress,
-        text: 'NEXT',
-        text_size: 36,
-        color: C.btnText,
-        click_func() { self.sendCmd('next') },
-      })
+      // ── PREV / NEXT (large) ───────────────────────────────
+      const bigY = TOP + 58
+      const bigH = 192
+      roundBtn(6,   bigY, 186, bigH, 'PREV', 42, C.prevBg, () => self.sendCmd('prev'))
+      roundBtn(198, bigY, 186, bigH, 'NEXT', 42, C.nextBg, () => self.sendCmd('next'))
 
-      // ── VOL-  /  PLAY  /  VOL+  (secondary row) ─────────
-      const rowY = 288
-      const rowH = 78
-      const rowW = 126
+      // ── VOL-  /  PLAY  /  VOL+ ───────────────────────────
+      const rowY = bigY + bigH + 6   // = TOP + 256
+      const rowH = 66
+      roundBtn(6,   rowY, 118, rowH, 'VOL-', 20, C.rowBg, () => self.sendCmd('voldown'))
+      roundBtn(136, rowY, 118, rowH, 'PLAY', 20, C.rowBg, () => self.sendCmd('play'))
+      roundBtn(264, rowY, 120, rowH, 'VOL+', 20, C.rowBg, () => self.sendCmd('volup'))
 
-      createWidget(widget.BUTTON, {
-        x: 6, y: rowY, w: rowW, h: rowH,
-        normal_color: C.rowBg,
-        press_color:  C.rowPress,
-        text: 'VOL-',
-        text_size: 18,
-        color: C.btnText,
-        click_func() { self.sendCmd('voldown') },
-      })
-      createWidget(widget.BUTTON, {
-        x: 138, y: rowY, w: rowW, h: rowH,
-        normal_color: C.rowBg,
-        press_color:  C.rowPress,
-        text: 'PLAY',
-        text_size: 18,
-        color: C.btnText,
-        click_func() { self.sendCmd('play') },
-      })
-      createWidget(widget.BUTTON, {
-        x: 270, y: rowY, w: rowW - 6, h: rowH,
-        normal_color: C.rowBg,
-        press_color:  C.rowPress,
-        text: 'VOL+',
-        text_size: 18,
-        color: C.btnText,
-        click_func() { self.sendCmd('volup') },
-      })
-
-      // ── BLANK screen button ───────────────────────────────
-      createWidget(widget.BUTTON, {
-        x: 6, y: 374, w: W - 12, h: 68,
-        normal_color: C.blankBg,
-        press_color:  C.blankPress,
-        text: 'BLANK SCREEN  (B)',
-        text_size: 18,
-        color: C.btnText,
-        click_func() { self.sendCmd('blank') },
-      })
+      // ── BLANK SCREEN ──────────────────────────────────────
+      const blankY = rowY + rowH + 6
+      roundBtn(6, blankY, W - 12, 58, 'BLANK SCREEN', 20, C.blankBg, () => self.sendCmd('blank'))
     },
 
     sendCmd(action) {
-      // Haptic feedback immediately on press
       try { vibrate({ type: 'short' }) } catch (e) {}
 
-      // Update status
       if (_dot)       _dot.setProperty(prop.MORE, { color: C.statusSend })
       if (_statusTxt) _statusTxt.setProperty(prop.MORE, { text: 'SENDING...', color: C.statusSend })
 
@@ -157,8 +107,8 @@ Page(
         { timeout: 8000 }
       )
         .then(() => {
-          if (_dot)       _dot.setProperty(prop.MORE, { color: C.statusOk })
-          if (_statusTxt) _statusTxt.setProperty(prop.MORE, { text: 'SENT', color: C.statusOk })
+          if (_dot)       _dot.setProperty(prop.MORE, { color: C.statusRdy })
+          if (_statusTxt) _statusTxt.setProperty(prop.MORE, { text: 'SENT', color: C.statusRdy })
           setTimeout(() => {
             if (_dot)       _dot.setProperty(prop.MORE, { color: C.dotBg })
             if (_statusTxt) _statusTxt.setProperty(prop.MORE, { text: 'READY', color: C.statusRdy })

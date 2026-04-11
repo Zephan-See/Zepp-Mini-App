@@ -18,6 +18,29 @@ echo "║    SLIDE FLIPPER v2.0 — One-Click Setup  ║"
 echo "╚══════════════════════════════════════════╝"
 echo ""
 
+# ── Device selection ──────────────────────────────────
+echo "  Which device are you installing on?"
+echo ""
+echo "    1)  Amazfit Bip 6"
+echo "    2)  Amazfit GTS 4 Mini"
+echo ""
+read -rp "  Enter 1 or 2: " DEVICE_CHOICE
+
+case "$DEVICE_CHOICE" in
+  2)
+    DEVICE_TARGET="Amazfit GTS 4 Mini"
+    DEVICE_LABEL="GTS 4 Mini"
+    ;;
+  *)
+    DEVICE_TARGET="Amazfit Bip 6"
+    DEVICE_LABEL="Bip 6"
+    ;;
+esac
+
+echo ""
+echo "  → Targeting: $DEVICE_LABEL"
+echo ""
+
 # ── STEP 1: Auto-detect IP ────────────────────────────
 echo "[ 1/3 ] Detecting IP address..."
 
@@ -76,7 +99,7 @@ echo ""
 echo "═══════════════════════════════════════════════════════"
 echo ""
 
-/opt/homebrew/bin/zeus preview --target "Amazfit Bip 6"
+/opt/homebrew/bin/zeus preview --target "$DEVICE_TARGET"
 
 echo ""
 echo "═══════════════════════════════════════════════════════"

@@ -47,12 +47,26 @@ Page(
       // Title
       createWidget(widget.TEXT, {
         x: 0, y: TOP - 2, w: W, h: 36,
-        text: 'SLIDE FLIPPER', text_size: 22, color: C.title,
+        text: 'MENU', text_size: 22, color: C.title,
         align_h: align.CENTER_H,
+      })
+      createWidget(widget.FILL_RECT, {
+        x: 10, y: TOP - 2, w: 64, h: 34, radius: 10, color: C.menuBg,
+      })
+      createWidget(widget.TEXT, {
+        x: 10, y: TOP + 5, w: 64, h: 20,
+        text: 'BACK', text_size: 15, color: C.title,
+        align_h: align.CENTER_H,
+      })
+      createWidget(widget.BUTTON, {
+        x: 0, y: TOP - 10, w: 96, h: 56,
+        normal_color: C.header, press_color: C.menuPress,
+        text: 'BACK', text_size: 15, color: C.title,
+        click_func() { push({ url: 'page/flipper/index.page' }) },
       })
       createWidget(widget.TEXT, {
         x: 0, y: TOP + 24, w: W, h: 18,
-        text: 'Remote control on your wrist', text_size: 12, color: C.subtitle,
+        text: 'Settings and install help', text_size: 12, color: C.subtitle,
         align_h: align.CENTER_H,
       })
 
@@ -68,48 +82,28 @@ Page(
       // Divider
       createWidget(widget.FILL_RECT, { x: 18, y: TOP + 70, w: W - 36, h: 2, color: C.divider })
 
-      // Menu 1 — FLIPPER
+      // Menu 1 — IP SETUP
       createWidget(widget.BUTTON, {
-        x: 12, y: TOP + 78, w: W - 24, h: 92,
-        normal_color: C.menuBg, press_color: C.menuPress,
-        text: 'FLIPPER', text_size: 22, color: C.menuText,
-        click_func() { push({ url: 'page/flipper/index.page' }) },
-      })
-      createWidget(widget.TEXT, {
-        x: 12, y: TOP + 144, w: W - 24, h: 20,
-        text: 'Prev / Next / Volume / Blank', text_size: 13, color: C.menuSub,
-        align_h: align.CENTER_H,
-      })
-
-      // Divider
-      createWidget(widget.FILL_RECT, { x: 22, y: TOP + 184, w: W - 44, h: 1, color: C.divider })
-
-      // Menu 2 — IP SETUP
-      createWidget(widget.BUTTON, {
-        x: 12, y: TOP + 192, w: W - 24, h: 92,
+        x: 12, y: TOP + 108, w: W - 24, h: 112,
         normal_color: C.menuBg, press_color: C.menuPress,
         text: 'IP SETUP', text_size: 22, color: C.menuText,
         click_func() { push({ url: 'page/ip-setup/index.page' }) },
       })
-      createWidget(widget.TEXT, {
-        x: 12, y: TOP + 258, w: W - 24, h: 20,
-        text: 'Connect to your computer', text_size: 13, color: C.menuSub,
-        align_h: align.CENTER_H,
-      })
 
       // Divider
-      createWidget(widget.FILL_RECT, { x: 22, y: TOP + 300, w: W - 44, h: 1, color: C.divider })
+      createWidget(widget.FILL_RECT, { x: 22, y: TOP + 234, w: W - 44, h: 1, color: C.divider })
 
-      // Menu 3 — INSTALL
+      // Menu 2 — INSTALL
       createWidget(widget.BUTTON, {
-        x: 12, y: TOP + 308, w: W - 24, h: 82,
+        x: 12, y: TOP + 244, w: W - 24, h: 112,
         normal_color: C.menuBg, press_color: C.menuPress,
         text: 'INSTALL', text_size: 22, color: C.menuText,
         click_func() { push({ url: 'page/tutorial/index.page' }) },
       })
       createWidget(widget.TEXT, {
-        x: 12, y: TOP + 364, w: W - 24, h: 20,
-        text: 'Mac + Windows setup guide', text_size: 13, color: C.menuSub,
+        x: 0, y: TOP + 372, w: W, h: 16,
+        text: 'Tap a card to open settings or install help',
+        text_size: 11, color: C.menuSub,
         align_h: align.CENTER_H,
       })
     },

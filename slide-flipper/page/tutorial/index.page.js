@@ -63,10 +63,18 @@ Page(
       createWidget(widget.FILL_RECT, { x: 0, y: 0, w: W, h: 92, color: C.header })
 
       // Header
+      createWidget(widget.FILL_RECT, {
+        x: 10, y: TOP - 2, w: 64, h: 34, radius: 10, color: C.backBg,
+      })
+      createWidget(widget.TEXT, {
+        x: 10, y: TOP + 5, w: 64, h: 20,
+        text: 'BACK', text_size: 15, color: C.title,
+        align_h: align.CENTER_H,
+      })
       createWidget(widget.BUTTON, {
-        x: 6, y: TOP, w: 60, h: 30,
-        normal_color: C.backBg, press_color: C.backPress,
-        text: 'BACK', text_size: 13, color: C.back,
+        x: 0, y: TOP - 14, w: 112, h: 64,
+        normal_color: C.header, press_color: C.backPress,
+        text: 'BACK', text_size: 15, color: C.title,
         click_func() { pop() },
       })
       createWidget(widget.TEXT, {
@@ -92,14 +100,14 @@ Page(
         x: 200, y: TAB_Y + 38, w: 184, h: 4, color: C.tabInaBg,
       })
       _tabMac = createWidget(widget.BUTTON, {
-        x: 6, y: TAB_Y, w: 184, h: 36,
-        normal_color: C.tabInaBg, press_color: C.tabInaPr,
+        x: 0, y: TAB_Y - 6, w: 196, h: 52,
+        normal_color: C.header, press_color: C.tabInaPr,
         text: ' ', text_size: 18, color: C.tabActTx,
         click_func() { self.setTab('mac') },
       })
       _tabWin = createWidget(widget.BUTTON, {
-        x: 200, y: TAB_Y, w: 184, h: 36,
-        normal_color: C.tabInaBg, press_color: C.tabInaPr,
+        x: 194, y: TAB_Y - 6, w: 196, h: 52,
+        normal_color: C.header, press_color: C.tabInaPr,
         text: ' ', text_size: 18, color: C.tabActTx,
         click_func() { self.setTab('win') },
       })

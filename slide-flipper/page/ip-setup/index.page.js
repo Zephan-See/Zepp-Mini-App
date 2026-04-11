@@ -92,16 +92,24 @@ Page(
         text: '', text_size: 11, color: C.histTxt,
         align_h: align.CENTER_H,
       })
+      createWidget(widget.FILL_RECT, {
+        x: 10, y: TOP - 2, w: 64, h: 34, radius: 10, color: C.backBg,
+      })
+      createWidget(widget.TEXT, {
+        x: 10, y: TOP + 5, w: 64, h: 20,
+        text: 'BACK', text_size: 15, color: C.title,
+        align_h: align.CENTER_H,
+      })
       createWidget(widget.BUTTON, {
-        x: 6, y: TOP, w: 60, h: 30,
-        normal_color: C.backBg, press_color: C.backPress,
-        text: 'BACK', text_size: 13, color: C.back,
+        x: 0, y: TOP - 10, w: 96, h: 56,
+        normal_color: C.header, press_color: C.backPress,
+        text: 'BACK', text_size: 15, color: C.title,
         click_func() { push({ url: 'page/home/index.page' }) },
       })
 
       // 4 octet boxes
-      const BOX_W = 78, BOX_H = 54, BOX_Y = TOP + 68
-      const BOX_GAP = 10
+      const BOX_W = 90, BOX_H = 64, BOX_Y = TOP + 60
+      const BOX_GAP = 2
       const BOX_LEFT = Math.floor((W - (4 * BOX_W + 3 * BOX_GAP)) / 2)
 
       _boxBtns = []
@@ -116,8 +124,8 @@ Page(
         const idx = i
 
         const btn = createWidget(widget.BUTTON, {
-          x: bx, y: BOX_Y, w: BOX_W, h: BOX_H,
-          normal_color: C.boxInact,
+          x: bx - 4, y: BOX_Y - 4, w: BOX_W + 8, h: BOX_H + 10,
+          normal_color: C.bg,
           press_color:  C.boxPress,
           text: ' ',
           text_size: 24,
@@ -126,7 +134,7 @@ Page(
         })
         _boxBtns.push(btn)
         _boxTexts.push(createWidget(widget.TEXT, {
-          x: bx + 8, y: BOX_Y + 13, w: BOX_W - 16, h: 28,
+          x: bx + 8, y: BOX_Y + 16, w: BOX_W - 16, h: 28,
           text: self.state.octets[i],
           text_size: 24, color: C.boxTxt,
           align_h: align.CENTER_H,
@@ -270,7 +278,7 @@ Page(
         }
       }
       if (_boxBtns[this.state.activeIdx]) {
-        const x = 24 + this.state.activeIdx * 88
+        const x = 12 + this.state.activeIdx * 92
         if (_activeBoxBg) _activeBoxBg.setProperty(prop.MORE, { x, color: C.boxActive })
       }
       _boxUnderlines.forEach((line, idx) => {

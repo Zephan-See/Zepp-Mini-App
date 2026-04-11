@@ -42,6 +42,11 @@ Page(
 
     onInit() {
       this.log('Flipper onInit')
+      const launched = localStorage.getItem('hasLaunched')
+      if (!launched) {
+        localStorage.setItem('hasLaunched', '1')
+        push({ url: 'page/tutorial/index.page' })
+      }
       const saved = localStorage.getItem('currentIP')
       if (saved) this.state.ip = saved
     },
@@ -62,20 +67,28 @@ Page(
         text: 'Presentation + media control', text_size: 11, color: C.subtitle,
         align_h: align.CENTER_H,
       })
-      // BACK BUTTON after title — sits on top, intercepts touches in its area
+      // Visible settings button
+      createWidget(widget.FILL_RECT, {
+        x: 314, y: TOP - 2, w: 62, h: 34, radius: 10, color: C.backBg,
+      })
+      // Oversized hit area for easier tapping
       createWidget(widget.BUTTON, {
-        x: 6, y: TOP, w: 60, h: 30,
-        normal_color: C.backBg, press_color: C.backPress,
-        text: 'BACK', text_size: 13, color: C.back,
+        x: 286, y: TOP - 12, w: 98, h: 58,
+        normal_color: C.header, press_color: C.backPress,
+        text: ' ', text_size: 16, color: C.title,
         click_func() { push({ url: 'page/home/index.page' }) },
+      })
+      createWidget(widget.IMG, {
+        x: 330, y: TOP + 3, w: 28, h: 28,
+        src: 'gear.png',
       })
 
       // Status
       _dot = createWidget(widget.FILL_RECT, {
-        x: 128, y: TOP + 50, w: 8, h: 8, radius: 4, color: C.dotBg,
+        x: 116, y: TOP + 50, w: 8, h: 8, radius: 4, color: C.dotBg,
       })
       _statusTxt = createWidget(widget.TEXT, {
-        x: 142, y: TOP + 46, w: 180, h: 20,
+        x: 130, y: TOP + 46, w: 180, h: 20,
         text: 'READY', text_size: 13, color: C.statusRdy,
       })
 

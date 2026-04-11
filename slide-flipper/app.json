@@ -29,8 +29,8 @@
       "module": {
         "page": {
           "pages": [
-            "page/home/index.page",
             "page/flipper/index.page",
+            "page/home/index.page",
             "page/ip-setup/index.page",
             "page/tutorial/index.page"
           ]

@@ -18,26 +18,24 @@ const W   = 390
 const TOP = 65
 
 const C = {
-  bg:         0x000000,
-  title:      0xFFFFFF,
-  back:       0x6666AA,
-  backBg:     0x111130,
-  boxInact:   0x111133,
-  boxActive:  0x0A3870,
-  boxText:    0xFFFFFF,
-  boxCursor:  0x4D94FF,
-  dot:        0x445566,
-  keyBg:      0x111122,
-  keyDel:     0x3A1020,
-  keySave:    0x0A5C30,
-  keyTxt:     0xFFFFFF,
-  histBg:     0x0A0A1A,
-  histTxt:    0x6688BB,
+  bg:        0x000000,
+  title:     0xFFFFFF,
+  back:      0x6666AA,
+  backBg:    0x111130,
+  boxInact:  0x111133,
+  boxActive: 0x0A3870,
+  boxTxt:    0xFFFFFF,
+  dot:       0x445566,
+  keyBg:     0x1A1A2E,
+  keyDel:    0x3A1020,
+  keySave:   0x0A5C30,
+  keyTxt:    0xFFFFFF,
+  histBg:    0x0A0A1A,
+  histTxt:   0x6688BB,
 }
 
-// Widget refs
-let _boxBgs   = []   // 4 FILL_RECT backgrounds
-let _boxTexts = []   // 4 TEXT value labels
+let _boxBgs   = []
+let _boxTexts = []
 
 Page(
   BasePage({
@@ -63,9 +61,7 @@ Page(
     },
 
     build() {
-      this.log('IP Setup build')
       const self = this
-
       createWidget(widget.FILL_RECT, { x: 0, y: 0, w: W, h: 450, color: C.bg })
 
       // ── Header ────────────────────────────────────────────
@@ -74,18 +70,18 @@ Page(
         text: 'IP SETUP', text_size: 20, color: C.title,
         align_h: align.CENTER_H,
       })
-      createWidget(widget.FILL_RECT, { x: 6, y: TOP, w: 64, h: 32, radius: 10, color: C.backBg })
-      createWidget(widget.TEXT, {
-        x: 6, y: TOP, w: 64, h: 32,
-        text: '< BACK', text_size: 13, color: C.back,
-        align_h: align.CENTER_H, align_v: align.CENTER_V,
+      createWidget(widget.FILL_RECT, {
+        x: 6, y: TOP, w: 64, h: 32, radius: 10, color: C.backBg,
         click_func() { self.saveAndExit() },
+      })
+      createWidget(widget.TEXT, {
+        x: 6, y: TOP + 9, w: 64, h: 14,
+        text: '< BACK', text_size: 13, color: C.back,
+        align_h: align.CENTER_H,
       })
 
       // ── 4 Octet boxes ─────────────────────────────────────
-      // Box: w=78, gap=10 (includes dot). Total=4*78+3*10=342. margin=24
-      const BOX_W = 78, BOX_H = 58, BOX_Y = TOP + 40
-      const BOX_GAP = 10
+      const BOX_W = 78, BOX_H = 58, BOX_Y = TOP + 40, BOX_GAP = 10
       const BOX_LEFT = Math.floor((W - (4 * BOX_W + 3 * BOX_GAP)) / 2)
 
       _boxBgs   = []
@@ -93,31 +89,30 @@ Page(
 
       for (let i = 0; i < 4; i++) {
         const bx = BOX_LEFT + i * (BOX_W + BOX_GAP)
+        const isActive = i === 0
 
+        // Background (click_func here — FILL_RECT supports it)
         const bg = createWidget(widget.FILL_RECT, {
           x: bx, y: BOX_Y, w: BOX_W, h: BOX_H,
           radius: 12,
-          color: i === 0 ? C.boxActive : C.boxInact,
+          color: isActive ? C.boxActive : C.boxInact,
+          click_func: (function(idx) { return function() { self.selectBox(idx) } })(i),
         })
+
+        // Value label (visual only, no click_func)
         const txt = createWidget(widget.TEXT, {
-          x: bx, y: BOX_Y, w: BOX_W, h: BOX_H,
+          x: bx, y: BOX_Y + Math.floor((BOX_H - 26) / 2),
+          w: BOX_W, h: 30,
           text: self.state.octets[i],
-          text_size: 26, color: C.boxText,
-          align_h: align.CENTER_H, align_v: align.CENTER_V,
+          text_size: 26, color: C.boxTxt,
+          align_h: align.CENTER_H,
         })
 
-        // Tap box → switch active
-        const idx = i
-        createWidget(widget.FILL_RECT, {
-          x: bx, y: BOX_Y, w: BOX_W, h: BOX_H,
-          radius: 12, color: 0x000001,   // near-black transparent overlay
-          click_func() { self.selectBox(idx) },
-        })
-
-        // Dot separator (not after last box)
+        // Dot separator
         if (i < 3) {
           createWidget(widget.TEXT, {
-            x: bx + BOX_W, y: BOX_Y + BOX_H / 2 - 10, w: BOX_GAP, h: 20,
+            x: bx + BOX_W, y: BOX_Y + 18,
+            w: BOX_GAP, h: 20,
             text: '.', text_size: 20, color: C.dot,
             align_h: align.CENTER_H,
           })
@@ -132,23 +127,24 @@ Page(
       const hist = this.state.history
       if (hist.length > 0) {
         let hx = 8
-        hist.slice(0, 4).forEach((ip) => {
+        hist.slice(0, 4).forEach(function(ip) {
           const chipW = ip.length * 8 + 16
-          createWidget(widget.FILL_RECT, { x: hx, y: HIST_Y, w: chipW, h: 24, radius: 8, color: C.histBg })
+          createWidget(widget.FILL_RECT, {
+            x: hx, y: HIST_Y, w: chipW, h: 24, radius: 8, color: C.histBg,
+            click_func: function() { self.loadIP(ip) },
+          })
           createWidget(widget.TEXT, {
-            x: hx, y: HIST_Y, w: chipW, h: 24,
+            x: hx, y: HIST_Y + 6, w: chipW, h: 14,
             text: ip, text_size: 12, color: C.histTxt,
-            align_h: align.CENTER_H, align_v: align.CENTER_V,
-            click_func() { self.loadIP(ip) },
+            align_h: align.CENTER_H,
           })
           hx += chipW + 6
         })
       }
 
       // ── 4 x 3 Keypad ──────────────────────────────────────
-      // Buttons: w=118, gap=8, margin=12
       const KEY_W = 118, KEY_H = 56, KEY_GAP = 8, KEY_MARGIN = 12
-      const KEY_Y = HIST_Y + 32   // starts below history
+      const KEY_Y = HIST_Y + 32
 
       const rows = [
         ['1', '2', '3'],
@@ -157,23 +153,27 @@ Page(
         ['DEL', '0', 'SAVE'],
       ]
 
-      rows.forEach((row, r) => {
+      rows.forEach(function(row, r) {
         const ky = KEY_Y + r * (KEY_H + KEY_GAP)
-        row.forEach((key, c) => {
+        row.forEach(function(key, c) {
           const kx = KEY_MARGIN + c * (KEY_W + KEY_GAP)
-
+          const isWord = key === 'DEL' || key === 'SAVE'
+          const sz = isWord ? 18 : 36
           let bg = C.keyBg
           if (key === 'DEL')  bg = C.keyDel
           if (key === 'SAVE') bg = C.keySave
-          const sz = (key === 'DEL' || key === 'SAVE') ? 18 : 36
 
-          // Rounded key: FILL_RECT (visual) + TEXT (click)
-          createWidget(widget.FILL_RECT, { x: kx, y: ky, w: KEY_W, h: KEY_H, radius: 14, color: bg })
+          // FILL_RECT handles the click (radius + click_func)
+          createWidget(widget.FILL_RECT, {
+            x: kx, y: ky, w: KEY_W, h: KEY_H, radius: 14, color: bg,
+            click_func: (function(k) { return function() { self.keyPress(k) } })(key),
+          })
+          // TEXT is visual only (no click_func)
           createWidget(widget.TEXT, {
-            x: kx, y: ky, w: KEY_W, h: KEY_H,
+            x: kx, y: ky + Math.floor((KEY_H - sz) / 2),
+            w: KEY_W, h: sz + 4,
             text: key, text_size: sz, color: C.keyTxt,
-            align_h: align.CENTER_H, align_v: align.CENTER_V,
-            click_func() { self.keyPress(key) },
+            align_h: align.CENTER_H,
           })
         })
       })
@@ -192,30 +192,18 @@ Page(
 
     keyPress(key) {
       try { vibrate({ type: 'short' }) } catch (e) {}
-
-      if (key === 'DEL') {
-        this.delPress()
-        return
-      }
-      if (key === 'SAVE') {
-        this.saveAndExit()
-        return
-      }
-      // Digit
+      if (key === 'DEL')  { this.delPress(); return }
+      if (key === 'SAVE') { this.saveAndExit(); return }
       this.digitPress(key)
     },
 
     digitPress(d) {
       if (this.state.inputBuffer.length >= 3) return
-
       this.state.inputBuffer += d
       const idx = this.state.activeIdx
-
-      // Update box display immediately (phone-dialer feel)
       if (_boxTexts[idx]) {
         _boxTexts[idx].setProperty(prop.MORE, { text: this.state.inputBuffer })
       }
-
       // Auto-advance after 3 digits
       if (this.state.inputBuffer.length === 3) {
         this.commitCurrent()
@@ -229,13 +217,11 @@ Page(
 
     delPress() {
       if (this.state.inputBuffer.length > 0) {
-        // Remove last digit
         this.state.inputBuffer = this.state.inputBuffer.slice(0, -1)
         const idx = this.state.activeIdx
-        const display = this.state.inputBuffer || (this.state.octets[idx] || '0')
+        const display = this.state.inputBuffer || this.state.octets[idx] || '0'
         if (_boxTexts[idx]) _boxTexts[idx].setProperty(prop.MORE, { text: display })
       } else if (this.state.activeIdx > 0) {
-        // Jump to previous box and clear it
         this.state.activeIdx--
         this.state.octets[this.state.activeIdx] = ''
         this.state.inputBuffer = ''
@@ -283,19 +269,17 @@ Page(
 
     saveAndExit() {
       this.commitCurrent()
-      const octets = this.state.octets.map((o) => {
+      const octets = this.state.octets.map(function(o) {
         const v = parseInt(o, 10)
         if (isNaN(v) || v < 0) return '0'
         return String(Math.min(v, 255))
       })
       const ip = octets.join('.')
       localStorage.setItem('currentIP', ip)
-
-      let hist = (this.state.history || []).filter(h => h !== ip)
+      let hist = (this.state.history || []).filter(function(h) { return h !== ip })
       hist.unshift(ip)
       if (hist.length > 5) hist = hist.slice(0, 5)
       localStorage.setItem('ipHistory', JSON.stringify(hist))
-
       pop()
     },
 

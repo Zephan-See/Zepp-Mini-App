@@ -24,17 +24,19 @@ const C = {
   divider:  0x1A1A2E,
 }
 
-let _tabMac = null
-let _tabWin = null
-let _stepWidgets = []   // all TEXT widgets in the step area (for tab switching)
+let _tabMacBg = null
+let _tabWinBg = null
+let _tabMacTx = null
+let _tabWinTx = null
+let _stepWidgets = []
 
 const MAC_STEPS = [
   { n: '1', t: 'Download from:' },
   { n: '',  t: 'github.com/Zephan-See/Zepp-Mini-App', code: true },
   { n: '2', t: 'Double-click START_BRIDGE.command' },
   { n: '3', t: 'Note the IP shown in terminal' },
-  { n: '4', t: 'Open app -> IP SETUP -> enter IP' },
-  { n: '5', t: 'Start presenting, tap FLIPPER!' },
+  { n: '4', t: 'Watch: IP SETUP -> enter that IP' },
+  { n: '5', t: 'Open presentation, tap FLIPPER!' },
 ]
 
 const WIN_STEPS = [
@@ -43,8 +45,8 @@ const WIN_STEPS = [
   { n: '2', t: 'Open PowerShell in pc-controller/' },
   { n: '',  t: 'node server.js', code: true },
   { n: '3', t: 'Note the IP shown in terminal' },
-  { n: '4', t: 'Open app -> IP SETUP -> enter IP' },
-  { n: '5', t: 'Start presenting, tap FLIPPER!' },
+  { n: '4', t: 'Watch: IP SETUP -> enter that IP' },
+  { n: '5', t: 'Open presentation, tap FLIPPER!' },
 ]
 
 Page(
@@ -55,9 +57,7 @@ Page(
     onInit() { this.log('Tutorial onInit') },
 
     build() {
-      this.log('Tutorial build')
       const self = this
-
       createWidget(widget.FILL_RECT, { x: 0, y: 0, w: W, h: 450, color: C.bg })
 
       // ── Header ────────────────────────────────────────────
@@ -66,35 +66,42 @@ Page(
         text: 'INSTALL GUIDE', text_size: 18, color: C.title,
         align_h: align.CENTER_H,
       })
-      createWidget(widget.FILL_RECT, { x: 6, y: TOP, w: 64, h: 32, radius: 10, color: C.backBg })
-      createWidget(widget.TEXT, {
-        x: 6, y: TOP, w: 64, h: 32,
-        text: '< BACK', text_size: 13, color: C.back,
-        align_h: align.CENTER_H, align_v: align.CENTER_V,
+      createWidget(widget.FILL_RECT, {
+        x: 6, y: TOP, w: 64, h: 32, radius: 10, color: C.backBg,
         click_func() { pop() },
+      })
+      createWidget(widget.TEXT, {
+        x: 6, y: TOP + 9, w: 64, h: 14,
+        text: '< BACK', text_size: 13, color: C.back,
+        align_h: align.CENTER_H,
       })
 
       // ── Platform tabs ─────────────────────────────────────
       const TAB_Y = TOP + 38
-      createWidget(widget.FILL_RECT, { x: 6,   y: TAB_Y, w: 184, h: 36, radius: 10, color: C.tabActBg })
-      _tabMac = createWidget(widget.TEXT, {
-        x: 6, y: TAB_Y, w: 184, h: 36,
-        text: 'MAC', text_size: 18, color: C.tabActTx,
-        align_h: align.CENTER_H, align_v: align.CENTER_V,
+
+      _tabMacBg = createWidget(widget.FILL_RECT, {
+        x: 6, y: TAB_Y, w: 184, h: 36, radius: 10, color: C.tabActBg,
         click_func() { self.setTab('mac') },
       })
+      _tabMacTx = createWidget(widget.TEXT, {
+        x: 6, y: TAB_Y + 9, w: 184, h: 18,
+        text: 'MAC', text_size: 18, color: C.tabActTx,
+        align_h: align.CENTER_H,
+      })
 
-      createWidget(widget.FILL_RECT, { x: 200, y: TAB_Y, w: 184, h: 36, radius: 10, color: C.tabInaBg })
-      _tabWin = createWidget(widget.TEXT, {
-        x: 200, y: TAB_Y, w: 184, h: 36,
-        text: 'WINDOWS', text_size: 18, color: C.tabInaTx,
-        align_h: align.CENTER_H, align_v: align.CENTER_V,
+      _tabWinBg = createWidget(widget.FILL_RECT, {
+        x: 200, y: TAB_Y, w: 184, h: 36, radius: 10, color: C.tabInaBg,
         click_func() { self.setTab('win') },
+      })
+      _tabWinTx = createWidget(widget.TEXT, {
+        x: 200, y: TAB_Y + 9, w: 184, h: 18,
+        text: 'WINDOWS', text_size: 18, color: C.tabInaTx,
+        align_h: align.CENTER_H,
       })
 
       createWidget(widget.FILL_RECT, { x: 0, y: TAB_Y + 40, w: W, h: 1, color: C.divider })
 
-      // ── Steps content ─────────────────────────────────────
+      // ── Steps ─────────────────────────────────────────────
       this.renderSteps(MAC_STEPS, TAB_Y + 46)
     },
 
@@ -102,11 +109,11 @@ Page(
       _stepWidgets = []
       let y = startY
 
-      steps.forEach((s) => {
+      steps.forEach(function(s) {
         if (s.code) {
           createWidget(widget.FILL_RECT, { x: 8, y, w: W - 16, h: 38, radius: 8, color: C.codeBg })
           const t = createWidget(widget.TEXT, {
-            x: 14, y: y + 6, w: W - 28, h: 26,
+            x: 14, y: y + 11, w: W - 28, h: 18,
             text: s.t, text_size: 12, color: C.code,
           })
           _stepWidgets.push({ w: t, isCode: true })
@@ -114,7 +121,7 @@ Page(
         } else {
           if (s.n) {
             createWidget(widget.TEXT, {
-              x: 10, y, w: 22, h: 22,
+              x: 10, y, w: 22, h: 20,
               text: s.n + '.', text_size: 14, color: C.stepNum,
             })
           }
@@ -128,9 +135,8 @@ Page(
         }
       })
 
-      // Footer
       createWidget(widget.TEXT, {
-        x: 0, y: 422, w: W, h: 20,
+        x: 0, y: 424, w: W, h: 18,
         text: 'Works with Slides, Canva, PowerPoint',
         text_size: 11, color: C.note,
         align_h: align.CENTER_H,
@@ -141,17 +147,16 @@ Page(
       this.state.platform = platform
       const isMac = platform === 'mac'
 
-      // Update tab text colors (FILL_RECT backgrounds are static, we swap text color)
-      if (_tabMac) _tabMac.setProperty(prop.MORE, { color: isMac  ? C.tabActTx : C.tabInaTx })
-      if (_tabWin) _tabWin.setProperty(prop.MORE, { color: !isMac ? C.tabActTx : C.tabInaTx })
+      if (_tabMacBg) _tabMacBg.setProperty(prop.MORE, { color: isMac  ? C.tabActBg : C.tabInaBg })
+      if (_tabWinBg) _tabWinBg.setProperty(prop.MORE, { color: !isMac ? C.tabActBg : C.tabInaBg })
+      if (_tabMacTx) _tabMacTx.setProperty(prop.MORE, { color: isMac  ? C.tabActTx : C.tabInaTx })
+      if (_tabWinTx) _tabWinTx.setProperty(prop.MORE, { color: !isMac ? C.tabActTx : C.tabInaTx })
 
-      // Update step text content
       const steps = isMac ? MAC_STEPS : WIN_STEPS
-      const allItems = steps  // same count assumed
-      _stepWidgets.forEach((ref, i) => {
-        if (i < allItems.length && ref.w) {
+      _stepWidgets.forEach(function(ref, i) {
+        if (i < steps.length && ref.w) {
           ref.w.setProperty(prop.MORE, {
-            text: allItems[i].t,
+            text: steps[i].t,
             color: ref.isCode ? C.code : (ref.isNote ? C.note : C.step),
           })
         }
@@ -159,8 +164,7 @@ Page(
     },
 
     onDestroy() {
-      _tabMac = null
-      _tabWin = null
+      _tabMacBg = _tabWinBg = _tabMacTx = _tabWinTx = null
       _stepWidgets = []
       this.log('Tutorial onDestroy')
     },

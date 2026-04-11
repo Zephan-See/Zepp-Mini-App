@@ -20,14 +20,16 @@ const C = {
   version: 0x444466,
 }
 
-// Rounded card button: FILL_RECT (visual) + TEXT (click target)
+// Rounded card: FILL_RECT handles click (supports click_func + radius)
+// TEXT is visual only — touches pass through to FILL_RECT below
 function card(x, y, w, h, label, sz, fn) {
-  createWidget(widget.FILL_RECT, { x, y, w, h, radius: 14, color: C.menuBg })
+  createWidget(widget.FILL_RECT, { x, y, w, h, radius: 14, color: C.menuBg, click_func: fn })
   createWidget(widget.TEXT, {
-    x, y, w, h,
+    x, y: y + Math.floor((h - sz) / 2),
+    w, h: sz + 4,
     text: label, text_size: sz, color: C.menuTxt,
-    align_h: align.CENTER_H, align_v: align.CENTER_V,
-    click_func: fn,
+    align_h: align.CENTER_H,
+    // No click_func — touch falls through to FILL_RECT
   })
 }
 

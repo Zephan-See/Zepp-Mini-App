@@ -7,7 +7,7 @@ import { localStorage } from '@zos/storage'
 import { vibrate } from '@zos/interaction'
 
 const W   = 390
-const TOP = 65   // safe area — clears the watch status bar
+const TOP = 65
 
 const C = {
   bg:         0x000000,
@@ -28,14 +28,15 @@ const C = {
 let _dot = null
 let _statusTxt = null
 
-// Rounded button: FILL_RECT (visual, radius) + TEXT (click target)
+// Rounded button: FILL_RECT (click_func + radius) + TEXT (visual only)
 function roundBtn(x, y, w, h, label, sz, bgColor, fn) {
-  createWidget(widget.FILL_RECT, { x, y, w, h, radius: 14, color: bgColor })
+  createWidget(widget.FILL_RECT, { x, y, w, h, radius: 14, color: bgColor, click_func: fn })
   createWidget(widget.TEXT, {
-    x, y, w, h,
+    x, y: y + Math.floor((h - sz) / 2),
+    w, h: sz + 4,
     text: label, text_size: sz, color: C.btnTxt,
-    align_h: align.CENTER_H, align_v: align.CENTER_V,
-    click_func: fn,
+    align_h: align.CENTER_H,
+    // No click_func — touch falls through to FILL_RECT
   })
 }
 
@@ -60,13 +61,12 @@ Page(
         text: 'FLIPPER', text_size: 20, color: C.title,
         align_h: align.CENTER_H,
       })
-      // BACK button (rounded)
-      createWidget(widget.FILL_RECT, { x: 6, y: TOP, w: 64, h: 32, radius: 10, color: C.backBg })
+      // BACK button
+      createWidget(widget.FILL_RECT, { x: 6, y: TOP, w: 64, h: 32, radius: 10, color: C.backBg, click_func() { pop() } })
       createWidget(widget.TEXT, {
-        x: 6, y: TOP, w: 64, h: 32,
+        x: 6, y: TOP + 9, w: 64, h: 14,
         text: '< BACK', text_size: 13, color: C.back,
-        align_h: align.CENTER_H, align_v: align.CENTER_V,
-        click_func() { pop() },
+        align_h: align.CENTER_H,
       })
 
       // ── Status row ────────────────────────────────────────
@@ -85,7 +85,7 @@ Page(
       roundBtn(198, bigY, 186, bigH, 'NEXT', 42, C.nextBg, () => self.sendCmd('next'))
 
       // ── VOL-  /  PLAY  /  VOL+ ───────────────────────────
-      const rowY = bigY + bigH + 6   // = TOP + 256
+      const rowY = bigY + bigH + 6
       const rowH = 66
       roundBtn(6,   rowY, 118, rowH, 'VOL-', 20, C.rowBg, () => self.sendCmd('voldown'))
       roundBtn(136, rowY, 118, rowH, 'PLAY', 20, C.rowBg, () => self.sendCmd('play'))

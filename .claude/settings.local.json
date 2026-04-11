@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx zeus:*)",
+      "Bash(python3 -c ':*)",
+      "Bash(cp \"/Users/zephan/Downloads/PPT Pointer ZEPP Apps/slide-flipper/assets/common.r/icon.png\" \"/Users/zephan/Downloads/PPT Pointer ZEPP Apps/slide-flipper/icon.png\")"
+    ]
+  }
+}

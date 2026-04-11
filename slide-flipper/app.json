@@ -1,0 +1,54 @@
+{
+  "configVersion": "v3",
+  "app": {
+    "appId": 1111110,
+    "appName": "SlideFlipper",
+    "appType": "app",
+    "version": {
+      "code": 2,
+      "name": "2.0.0"
+    },
+    "icon": "icon.png",
+    "vender": "zephan",
+    "description": "Wireless presentation remote for Google Slides, Canva, PowerPoint"
+  },
+  "permissions": [
+    "device:os.bg.network"
+  ],
+  "runtime": {
+    "apiVersion": {
+      "compatible": "1.0",
+      "target": "1.0",
+      "minVersion": "3.0"
+    }
+  },
+  "debug": false,
+  "targets": {
+    "common": {
+      "module": {
+        "page": {
+          "pages": [
+            "page/home/index.page",
+            "page/flipper/index.page",
+            "page/ip-setup/index.page",
+            "page/tutorial/index.page"
+          ]
+        },
+        "app-side": {
+          "path": "app-side/index"
+        }
+      },
+      "platforms": [
+        { "st": "r" },
+        { "st": "s" },
+        { "st": "b" }
+      ],
+      "designWidth": 390
+    }
+  },
+  "i18n": {
+    "en-US": { "appName": "SlideFlipper" },
+    "zh-CN": { "appName": "幻灯片翻页器" }
+  },
+  "defaultLanguage": "en-US"
+}

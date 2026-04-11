@@ -5,15 +5,18 @@ import { createWidget, widget, prop, align } from '@zos/ui'
 import { pop } from '@zos/router'
 
 const W   = 390
-const TOP = 65
+const TOP = 60
 
 const C = {
   bg:       0x000000,
   title:    0xFFFFFF,
-  back:     0x6666AA,
-  backBg:   0x111130,
+  backBg:   0x111122,
+  backPress:0x222244,
+  back:     0x555577,
   tabActBg: 0x0A3870,
+  tabActPr: 0x1A60C0,
   tabInaBg: 0x111122,
+  tabInaPr: 0x222244,
   tabActTx: 0xFFFFFF,
   tabInaTx: 0x6666AA,
   step:     0xCCCCEE,
@@ -24,10 +27,8 @@ const C = {
   divider:  0x1A1A2E,
 }
 
-let _tabMacBg = null
-let _tabWinBg = null
-let _tabMacTx = null
-let _tabWinTx = null
+let _tabMac = null
+let _tabWin = null
 let _stepWidgets = []
 
 const MAC_STEPS = [
@@ -60,48 +61,37 @@ Page(
       const self = this
       createWidget(widget.FILL_RECT, { x: 0, y: 0, w: W, h: 450, color: C.bg })
 
-      // ── Header ────────────────────────────────────────────
-      createWidget(widget.TEXT, {
-        x: 0, y: TOP, w: W, h: 32,
-        text: 'INSTALL GUIDE', text_size: 18, color: C.title,
-        align_h: align.CENTER_H,
-      })
-      createWidget(widget.FILL_RECT, {
-        x: 6, y: TOP, w: 64, h: 32, radius: 10, color: C.backBg,
+      // Header
+      createWidget(widget.BUTTON, {
+        x: 6, y: TOP, w: 60, h: 30,
+        normal_color: C.backBg, press_color: C.backPress,
+        text: 'BACK', text_size: 13, color: C.back,
         click_func() { pop() },
       })
       createWidget(widget.TEXT, {
-        x: 6, y: TOP + 9, w: 64, h: 14,
-        text: '< BACK', text_size: 13, color: C.back,
+        x: 0, y: TOP + 2, w: W, h: 28,
+        text: 'INSTALL GUIDE', text_size: 18, color: C.title,
         align_h: align.CENTER_H,
       })
 
-      // ── Platform tabs ─────────────────────────────────────
+      // Platform tabs
       const TAB_Y = TOP + 38
-
-      _tabMacBg = createWidget(widget.FILL_RECT, {
-        x: 6, y: TAB_Y, w: 184, h: 36, radius: 10, color: C.tabActBg,
+      _tabMac = createWidget(widget.BUTTON, {
+        x: 6, y: TAB_Y, w: 184, h: 36,
+        normal_color: C.tabActBg, press_color: C.tabActPr,
+        text: 'MAC', text_size: 18, color: C.tabActTx,
         click_func() { self.setTab('mac') },
       })
-      _tabMacTx = createWidget(widget.TEXT, {
-        x: 6, y: TAB_Y + 9, w: 184, h: 18,
-        text: 'MAC', text_size: 18, color: C.tabActTx,
-        align_h: align.CENTER_H,
-      })
-
-      _tabWinBg = createWidget(widget.FILL_RECT, {
-        x: 200, y: TAB_Y, w: 184, h: 36, radius: 10, color: C.tabInaBg,
-        click_func() { self.setTab('win') },
-      })
-      _tabWinTx = createWidget(widget.TEXT, {
-        x: 200, y: TAB_Y + 9, w: 184, h: 18,
+      _tabWin = createWidget(widget.BUTTON, {
+        x: 200, y: TAB_Y, w: 184, h: 36,
+        normal_color: C.tabInaBg, press_color: C.tabInaPr,
         text: 'WINDOWS', text_size: 18, color: C.tabInaTx,
-        align_h: align.CENTER_H,
+        click_func() { self.setTab('win') },
       })
 
       createWidget(widget.FILL_RECT, { x: 0, y: TAB_Y + 40, w: W, h: 1, color: C.divider })
 
-      // ── Steps ─────────────────────────────────────────────
+      // Steps
       this.renderSteps(MAC_STEPS, TAB_Y + 46)
     },
 
@@ -111,13 +101,13 @@ Page(
 
       steps.forEach(function(s) {
         if (s.code) {
-          createWidget(widget.FILL_RECT, { x: 8, y, w: W - 16, h: 38, radius: 8, color: C.codeBg })
+          createWidget(widget.FILL_RECT, { x: 8, y, w: W - 16, h: 36, color: C.codeBg })
           const t = createWidget(widget.TEXT, {
-            x: 14, y: y + 11, w: W - 28, h: 18,
+            x: 14, y: y + 10, w: W - 28, h: 18,
             text: s.t, text_size: 12, color: C.code,
           })
           _stepWidgets.push({ w: t, isCode: true })
-          y += 44
+          y += 42
         } else {
           if (s.n) {
             createWidget(widget.TEXT, {
@@ -131,7 +121,7 @@ Page(
             color: s.n ? C.step : C.note,
           })
           _stepWidgets.push({ w: t, isCode: false, isNote: !s.n })
-          y += s.n ? 40 : 30
+          y += s.n ? 40 : 28
         }
       })
 
@@ -147,10 +137,14 @@ Page(
       this.state.platform = platform
       const isMac = platform === 'mac'
 
-      if (_tabMacBg) _tabMacBg.setProperty(prop.MORE, { color: isMac  ? C.tabActBg : C.tabInaBg })
-      if (_tabWinBg) _tabWinBg.setProperty(prop.MORE, { color: !isMac ? C.tabActBg : C.tabInaBg })
-      if (_tabMacTx) _tabMacTx.setProperty(prop.MORE, { color: isMac  ? C.tabActTx : C.tabInaTx })
-      if (_tabWinTx) _tabWinTx.setProperty(prop.MORE, { color: !isMac ? C.tabActTx : C.tabInaTx })
+      if (_tabMac) _tabMac.setProperty(prop.MORE, {
+        normal_color: isMac  ? C.tabActBg : C.tabInaBg,
+        color:        isMac  ? C.tabActTx : C.tabInaTx,
+      })
+      if (_tabWin) _tabWin.setProperty(prop.MORE, {
+        normal_color: !isMac ? C.tabActBg : C.tabInaBg,
+        color:        !isMac ? C.tabActTx : C.tabInaTx,
+      })
 
       const steps = isMac ? MAC_STEPS : WIN_STEPS
       _stepWidgets.forEach(function(ref, i) {
@@ -164,7 +158,8 @@ Page(
     },
 
     onDestroy() {
-      _tabMacBg = _tabWinBg = _tabMacTx = _tabWinTx = null
+      _tabMac = null
+      _tabWin = null
       _stepWidgets = []
       this.log('Tutorial onDestroy')
     },

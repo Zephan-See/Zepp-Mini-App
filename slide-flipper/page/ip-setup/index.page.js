@@ -15,27 +15,33 @@ import { localStorage } from '@zos/storage'
 import { vibrate } from '@zos/interaction'
 
 const W   = 390
-const TOP = 65
+const TOP = 60
 
 const C = {
   bg:        0x000000,
   title:     0xFFFFFF,
-  back:      0x6666AA,
-  backBg:    0x111130,
+  backBg:    0x111122,
+  backPress: 0x222244,
+  back:      0x555577,
   boxInact:  0x111133,
   boxActive: 0x0A3870,
+  boxPress:  0x1A60C0,
   boxTxt:    0xFFFFFF,
   dot:       0x445566,
   keyBg:     0x1A1A2E,
+  keyPress:  0x2A2A4E,
   keyDel:    0x3A1020,
+  keyDelPr:  0x6A2040,
   keySave:   0x0A5C30,
+  keySavePr: 0x18A050,
   keyTxt:    0xFFFFFF,
   histBg:    0x0A0A1A,
+  histPress: 0x1A1A3A,
   histTxt:   0x6688BB,
 }
 
-let _boxBgs   = []
-let _boxTexts = []
+// BUTTON widget refs for the 4 octet boxes
+let _boxBtns = []
 
 Page(
   BasePage({
@@ -64,85 +70,71 @@ Page(
       const self = this
       createWidget(widget.FILL_RECT, { x: 0, y: 0, w: W, h: 450, color: C.bg })
 
-      // ── Header ────────────────────────────────────────────
-      createWidget(widget.TEXT, {
-        x: 0, y: TOP, w: W, h: 32,
-        text: 'IP SETUP', text_size: 20, color: C.title,
-        align_h: align.CENTER_H,
-      })
-      createWidget(widget.FILL_RECT, {
-        x: 6, y: TOP, w: 64, h: 32, radius: 10, color: C.backBg,
+      // Header
+      createWidget(widget.BUTTON, {
+        x: 6, y: TOP, w: 60, h: 30,
+        normal_color: C.backBg, press_color: C.backPress,
+        text: 'BACK', text_size: 13, color: C.back,
         click_func() { self.saveAndExit() },
       })
       createWidget(widget.TEXT, {
-        x: 6, y: TOP + 9, w: 64, h: 14,
-        text: '< BACK', text_size: 13, color: C.back,
+        x: 0, y: TOP + 2, w: W, h: 28,
+        text: 'IP SETUP', text_size: 20, color: C.title,
         align_h: align.CENTER_H,
       })
 
-      // ── 4 Octet boxes ─────────────────────────────────────
-      const BOX_W = 78, BOX_H = 58, BOX_Y = TOP + 40, BOX_GAP = 10
+      // 4 octet boxes — BUTTON widget so text is updatable + clickable
+      // Box: w=78, gap=10. Total=4*78+3*10=342. margin=24
+      const BOX_W = 78, BOX_H = 54, BOX_Y = TOP + 38
+      const BOX_GAP = 10
       const BOX_LEFT = Math.floor((W - (4 * BOX_W + 3 * BOX_GAP)) / 2)
 
-      _boxBgs   = []
-      _boxTexts = []
-
+      _boxBtns = []
       for (let i = 0; i < 4; i++) {
         const bx = BOX_LEFT + i * (BOX_W + BOX_GAP)
         const isActive = i === 0
+        const idx = i
 
-        // Background (click_func here — FILL_RECT supports it)
-        const bg = createWidget(widget.FILL_RECT, {
+        const btn = createWidget(widget.BUTTON, {
           x: bx, y: BOX_Y, w: BOX_W, h: BOX_H,
-          radius: 12,
-          color: isActive ? C.boxActive : C.boxInact,
-          click_func: (function(idx) { return function() { self.selectBox(idx) } })(i),
-        })
-
-        // Value label (visual only, no click_func)
-        const txt = createWidget(widget.TEXT, {
-          x: bx, y: BOX_Y + Math.floor((BOX_H - 26) / 2),
-          w: BOX_W, h: 30,
+          normal_color: isActive ? C.boxActive : C.boxInact,
+          press_color:  C.boxPress,
           text: self.state.octets[i],
-          text_size: 26, color: C.boxTxt,
-          align_h: align.CENTER_H,
+          text_size: 24,
+          color: C.boxTxt,
+          click_func() { self.selectBox(idx) },
         })
+        _boxBtns.push(btn)
 
         // Dot separator
         if (i < 3) {
           createWidget(widget.TEXT, {
-            x: bx + BOX_W, y: BOX_Y + 18,
-            w: BOX_GAP, h: 20,
-            text: '.', text_size: 20, color: C.dot,
+            x: bx + BOX_W + 1, y: BOX_Y + 16,
+            w: BOX_GAP, h: 22,
+            text: '.', text_size: 22, color: C.dot,
             align_h: align.CENTER_H,
           })
         }
-
-        _boxBgs.push(bg)
-        _boxTexts.push(txt)
       }
 
-      // ── History chips ─────────────────────────────────────
+      // History chips
       const HIST_Y = BOX_Y + BOX_H + 8
       const hist = this.state.history
       if (hist.length > 0) {
-        let hx = 8
+        let hx = 6
         hist.slice(0, 4).forEach(function(ip) {
-          const chipW = ip.length * 8 + 16
-          createWidget(widget.FILL_RECT, {
-            x: hx, y: HIST_Y, w: chipW, h: 24, radius: 8, color: C.histBg,
-            click_func: function() { self.loadIP(ip) },
+          const chipW = Math.min(ip.length * 8 + 14, 120)
+          createWidget(widget.BUTTON, {
+            x: hx, y: HIST_Y, w: chipW, h: 24,
+            normal_color: C.histBg, press_color: C.histPress,
+            text: ip, text_size: 11, color: C.histTxt,
+            click_func() { self.loadIP(ip) },
           })
-          createWidget(widget.TEXT, {
-            x: hx, y: HIST_Y + 6, w: chipW, h: 14,
-            text: ip, text_size: 12, color: C.histTxt,
-            align_h: align.CENTER_H,
-          })
-          hx += chipW + 6
+          hx += chipW + 4
         })
       }
 
-      // ── 4 x 3 Keypad ──────────────────────────────────────
+      // 4×3 Keypad — BUTTON widget (proven to work)
       const KEY_W = 118, KEY_H = 56, KEY_GAP = 8, KEY_MARGIN = 12
       const KEY_Y = HIST_Y + 32
 
@@ -158,22 +150,16 @@ Page(
         row.forEach(function(key, c) {
           const kx = KEY_MARGIN + c * (KEY_W + KEY_GAP)
           const isWord = key === 'DEL' || key === 'SAVE'
-          const sz = isWord ? 18 : 36
-          let bg = C.keyBg
-          if (key === 'DEL')  bg = C.keyDel
-          if (key === 'SAVE') bg = C.keySave
+          const sz = isWord ? 18 : 34
+          let bg = C.keyBg,  pr = C.keyPress
+          if (key === 'DEL')  { bg = C.keyDel;  pr = C.keyDelPr  }
+          if (key === 'SAVE') { bg = C.keySave; pr = C.keySavePr }
 
-          // FILL_RECT handles the click (radius + click_func)
-          createWidget(widget.FILL_RECT, {
-            x: kx, y: ky, w: KEY_W, h: KEY_H, radius: 14, color: bg,
-            click_func: (function(k) { return function() { self.keyPress(k) } })(key),
-          })
-          // TEXT is visual only (no click_func)
-          createWidget(widget.TEXT, {
-            x: kx, y: ky + Math.floor((KEY_H - sz) / 2),
-            w: KEY_W, h: sz + 4,
+          createWidget(widget.BUTTON, {
+            x: kx, y: ky, w: KEY_W, h: KEY_H,
+            normal_color: bg, press_color: pr,
             text: key, text_size: sz, color: C.keyTxt,
-            align_h: align.CENTER_H,
+            click_func() { self.keyPress(key) },
           })
         })
       })
@@ -201,8 +187,8 @@ Page(
       if (this.state.inputBuffer.length >= 3) return
       this.state.inputBuffer += d
       const idx = this.state.activeIdx
-      if (_boxTexts[idx]) {
-        _boxTexts[idx].setProperty(prop.MORE, { text: this.state.inputBuffer })
+      if (_boxBtns[idx]) {
+        _boxBtns[idx].setProperty(prop.MORE, { text: this.state.inputBuffer })
       }
       // Auto-advance after 3 digits
       if (this.state.inputBuffer.length === 3) {
@@ -220,7 +206,7 @@ Page(
         this.state.inputBuffer = this.state.inputBuffer.slice(0, -1)
         const idx = this.state.activeIdx
         const display = this.state.inputBuffer || this.state.octets[idx] || '0'
-        if (_boxTexts[idx]) _boxTexts[idx].setProperty(prop.MORE, { text: display })
+        if (_boxBtns[idx]) _boxBtns[idx].setProperty(prop.MORE, { text: display })
       } else if (this.state.activeIdx > 0) {
         this.state.activeIdx--
         this.state.octets[this.state.activeIdx] = ''
@@ -244,15 +230,15 @@ Page(
     refreshBoxes() {
       for (let i = 0; i < 4; i++) {
         const isActive = i === this.state.activeIdx
-        if (_boxBgs[i]) {
-          _boxBgs[i].setProperty(prop.MORE, { color: isActive ? C.boxActive : C.boxInact })
-        }
-        if (_boxTexts[i]) {
+        if (_boxBtns[i]) {
           const showBuf = isActive && this.state.inputBuffer !== ''
           const text = showBuf
             ? this.state.inputBuffer
             : (this.state.octets[i] || (isActive ? '_' : '0'))
-          _boxTexts[i].setProperty(prop.MORE, { text })
+          _boxBtns[i].setProperty(prop.MORE, {
+            normal_color: isActive ? C.boxActive : C.boxInact,
+            text,
+          })
         }
       }
     },
@@ -284,8 +270,7 @@ Page(
     },
 
     onDestroy() {
-      _boxBgs   = []
-      _boxTexts = []
+      _boxBtns = []
       this.log('IP Setup onDestroy')
     },
   }),

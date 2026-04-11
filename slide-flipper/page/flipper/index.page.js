@@ -7,17 +7,22 @@ import { localStorage } from '@zos/storage'
 import { vibrate } from '@zos/interaction'
 
 const W   = 390
-const TOP = 65
+const TOP = 60
 
 const C = {
   bg:         0x000000,
   title:      0xFFFFFF,
-  back:       0x6666AA,
-  backBg:     0x111130,
+  backBg:     0x111122,
+  backPress:  0x222244,
+  back:       0x555577,
   prevBg:     0x0A3870,
+  prevPress:  0x1A60C0,
   nextBg:     0x0A5C30,
-  rowBg:      0x1A1032,
+  nextPress:  0x18A050,
+  rowBg:      0x1A1030,
+  rowPress:   0x2A2050,
   blankBg:    0x4A1A1A,
+  blankPress: 0x7A2A2A,
   btnTxt:     0xFFFFFF,
   dotBg:      0x333344,
   statusRdy:  0x00CC66,
@@ -27,18 +32,6 @@ const C = {
 
 let _dot = null
 let _statusTxt = null
-
-// Rounded button: FILL_RECT (click_func + radius) + TEXT (visual only)
-function roundBtn(x, y, w, h, label, sz, bgColor, fn) {
-  createWidget(widget.FILL_RECT, { x, y, w, h, radius: 14, color: bgColor, click_func: fn })
-  createWidget(widget.TEXT, {
-    x, y: y + Math.floor((h - sz) / 2),
-    w, h: sz + 4,
-    text: label, text_size: sz, color: C.btnTxt,
-    align_h: align.CENTER_H,
-    // No click_func — touch falls through to FILL_RECT
-  })
-}
 
 Page(
   BasePage({
@@ -55,45 +48,74 @@ Page(
       const self = this
       createWidget(widget.FILL_RECT, { x: 0, y: 0, w: W, h: 450, color: C.bg })
 
-      // ── Header ────────────────────────────────────────────
+      // Header: BACK + title
+      createWidget(widget.BUTTON, {
+        x: 6, y: TOP, w: 60, h: 30,
+        normal_color: C.backBg, press_color: C.backPress,
+        text: 'BACK', text_size: 13, color: C.back,
+        click_func() { pop() },
+      })
       createWidget(widget.TEXT, {
-        x: 0, y: TOP, w: W, h: 32,
+        x: 0, y: TOP + 2, w: W, h: 28,
         text: 'FLIPPER', text_size: 20, color: C.title,
         align_h: align.CENTER_H,
       })
-      // BACK button
-      createWidget(widget.FILL_RECT, { x: 6, y: TOP, w: 64, h: 32, radius: 10, color: C.backBg, click_func() { pop() } })
-      createWidget(widget.TEXT, {
-        x: 6, y: TOP + 9, w: 64, h: 14,
-        text: '< BACK', text_size: 13, color: C.back,
-        align_h: align.CENTER_H,
-      })
 
-      // ── Status row ────────────────────────────────────────
+      // Status row
       _dot = createWidget(widget.FILL_RECT, {
-        x: 136, y: TOP + 40, w: 8, h: 8, radius: 4, color: C.dotBg,
+        x: 136, y: TOP + 38, w: 8, h: 8, radius: 4, color: C.dotBg,
       })
       _statusTxt = createWidget(widget.TEXT, {
-        x: 150, y: TOP + 36, w: 180, h: 20,
+        x: 150, y: TOP + 34, w: 180, h: 20,
         text: 'READY', text_size: 13, color: C.statusRdy,
       })
 
-      // ── PREV / NEXT (large) ───────────────────────────────
-      const bigY = TOP + 58
-      const bigH = 192
-      roundBtn(6,   bigY, 186, bigH, 'PREV', 42, C.prevBg, () => self.sendCmd('prev'))
-      roundBtn(198, bigY, 186, bigH, 'NEXT', 42, C.nextBg, () => self.sendCmd('next'))
+      // PREV / NEXT — large buttons
+      const bigY = TOP + 54
+      const bigH = 190
+      createWidget(widget.BUTTON, {
+        x: 6, y: bigY, w: 186, h: bigH,
+        normal_color: C.prevBg, press_color: C.prevPress,
+        text: 'PREV', text_size: 38, color: C.btnTxt,
+        click_func() { self.sendCmd('prev') },
+      })
+      createWidget(widget.BUTTON, {
+        x: 198, y: bigY, w: 186, h: bigH,
+        normal_color: C.nextBg, press_color: C.nextPress,
+        text: 'NEXT', text_size: 38, color: C.btnTxt,
+        click_func() { self.sendCmd('next') },
+      })
 
-      // ── VOL-  /  PLAY  /  VOL+ ───────────────────────────
+      // VOL- / PLAY / VOL+
       const rowY = bigY + bigH + 6
       const rowH = 66
-      roundBtn(6,   rowY, 118, rowH, 'VOL-', 20, C.rowBg, () => self.sendCmd('voldown'))
-      roundBtn(136, rowY, 118, rowH, 'PLAY', 20, C.rowBg, () => self.sendCmd('play'))
-      roundBtn(264, rowY, 120, rowH, 'VOL+', 20, C.rowBg, () => self.sendCmd('volup'))
+      createWidget(widget.BUTTON, {
+        x: 6, y: rowY, w: 118, h: rowH,
+        normal_color: C.rowBg, press_color: C.rowPress,
+        text: 'VOL-', text_size: 20, color: C.btnTxt,
+        click_func() { self.sendCmd('voldown') },
+      })
+      createWidget(widget.BUTTON, {
+        x: 136, y: rowY, w: 118, h: rowH,
+        normal_color: C.rowBg, press_color: C.rowPress,
+        text: 'PLAY', text_size: 20, color: C.btnTxt,
+        click_func() { self.sendCmd('play') },
+      })
+      createWidget(widget.BUTTON, {
+        x: 266, y: rowY, w: 118, h: rowH,
+        normal_color: C.rowBg, press_color: C.rowPress,
+        text: 'VOL+', text_size: 20, color: C.btnTxt,
+        click_func() { self.sendCmd('volup') },
+      })
 
-      // ── BLANK SCREEN ──────────────────────────────────────
+      // BLANK SCREEN
       const blankY = rowY + rowH + 6
-      roundBtn(6, blankY, W - 12, 58, 'BLANK SCREEN', 20, C.blankBg, () => self.sendCmd('blank'))
+      createWidget(widget.BUTTON, {
+        x: 6, y: blankY, w: W - 12, h: 56,
+        normal_color: C.blankBg, press_color: C.blankPress,
+        text: 'BLANK SCREEN', text_size: 20, color: C.btnTxt,
+        click_func() { self.sendCmd('blank') },
+      })
     },
 
     sendCmd(action) {

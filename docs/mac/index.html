@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>SlideFlipper — Mac Install</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0d1117;
+      --surface: #161b22;
+      --border:  #30363d;
+      --text:    #e6edf3;
+      --muted:   #8b949e;
+      --green:   #3fb950;
+      --blue:    #58a6ff;
+      --copy-bg: #238636;
+      --copy-hover: #2ea043;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100dvh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 0 0 60px;
+    }
+
+    main {
+      width: 100%;
+      max-width: 600px;
+      padding: 40px 20px 0;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #1a2a1a;
+      border: 1px solid #2d4a2d;
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 13px;
+      color: var(--green);
+      margin-bottom: 20px;
+    }
+
+    .badge .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    h1 {
+      font-size: clamp(24px, 6vw, 34px);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 32px;
+    }
+
+    /* ── Steps ───────────────────────────────────────── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: #1a2233;
+      border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--blue);
+      margin-top: 1px;
+    }
+
+    .step-text {
+      font-size: 15px;
+      color: var(--text);
+      line-height: 1.5;
+      padding-top: 3px;
+    }
+
+    .step-text strong { color: #fff; }
+
+    /* ── Command card ────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .card-header {
+      background: #0d1117;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .card-header::before {
+      content: '';
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #ff5f57;
+      box-shadow: 14px 0 0 #febc2e, 28px 0 0 #28c840;
+    }
+
+    .card-header span { margin-left: 28px; }
+
+    pre {
+      padding: 18px 16px;
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-all;
+      font-size: 14px;
+      line-height: 1.6;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      color: #a5d6ff;
+      user-select: all;
+    }
+
+    /* ── Copy button ─────────────────────────────────── */
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 16px;
+      background: var(--copy-bg);
+      border: none;
+      border-radius: 10px;
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .copy-btn:active { transform: scale(0.97); background: var(--copy-hover); }
+    .copy-btn svg { flex-shrink: 0; }
+
+    .copy-status {
+      margin-top: 14px;
+      min-height: 22px;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--green);
+      transition: opacity .2s;
+    }
+
+    .copy-status.hidden { opacity: 0; }
+
+    /* ── After-copy hint ─────────────────────────────── */
+    .after-card {
+      background: #0f1f0f;
+      border: 1px solid #2d4a2d;
+      border-radius: 12px;
+      padding: 18px 16px;
+      margin-top: 24px;
+    }
+
+    .after-card h2 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 10px;
+    }
+
+    .after-steps {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .after-steps li {
+      font-size: 14px;
+      color: #cce8cc;
+      line-height: 1.4;
+      display: flex;
+      gap: 8px;
+    }
+
+    .after-steps li::before {
+      content: '→';
+      color: var(--green);
+      flex-shrink: 0;
+    }
+
+    .note {
+      margin-top: 24px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="badge">
+      <span class="dot"></span>
+      Mac Install &mdash; SlideFlipper
+    </div>
+
+    <h1>Turn your watch into a clicker 🖱</h1>
+    <p class="subtitle">One command sets everything up. No coding experience needed.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Tap <strong>Copy</strong> below to copy the install command.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">Open <strong>Terminal</strong> on your Mac &mdash; press <strong>⌘ Space</strong>, type <em>Terminal</em>, press Enter.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Paste (<strong>⌘ V</strong>) and press <strong>Enter</strong>. Done!</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span>Terminal</span></div>
+      <pre id="cmd">curl -fsSL https://raw.githubusercontent.com/Zephan-See/Zepp-Mini-App/main/slide-flipper/pc-controller/server.js -o ~/Desktop/slideflipper.js && node ~/Desktop/slideflipper.js</pre>
+    </div>
+
+    <button class="copy-btn" id="copyBtn" type="button">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="9" width="13" height="13" rx="2"/>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+      </svg>
+      Copy Command
+    </button>
+
+    <div class="copy-status hidden" id="copyStatus">✓ Copied! Now paste into Terminal.</div>
+
+    <div class="after-card">
+      <h2>After pasting &amp; pressing Enter:</h2>
+      <ul class="after-steps">
+        <li>The controller starts and shows your Mac's IP address.</li>
+        <li>Enter that IP in the <strong>IP SETUP</strong> screen on your watch.</li>
+        <li>Open your presentation, then tap <strong>FLIPPER</strong> on the watch to control it.</li>
+        <li>Keep Terminal open while presenting.</li>
+      </ul>
+    </div>
+
+    <p class="note">Need to run it again another day? The file is saved on your Desktop as <code>slideflipper.js</code>.<br>Just open Terminal and type: <code>node ~/Desktop/slideflipper.js</code></p>
+  </main>
+
+  <script>
+    const cmd = document.getElementById('cmd').textContent.trim();
+    const btn = document.getElementById('copyBtn');
+    const status = document.getElementById('copyStatus');
+    let timer;
+
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(cmd);
+        btn.textContent = '✓ Copied!';
+        status.classList.remove('hidden');
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy Command`;
+          status.classList.add('hidden');
+        }, 3000);
+      } catch {
+        status.textContent = 'Press and hold the command above to copy it manually.';
+        status.classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

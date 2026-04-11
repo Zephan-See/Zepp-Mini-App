@@ -107,8 +107,9 @@ jobs:
             ### Download
             | Platform | File |
             |----------|------|
-            | **Mac** (Apple Silicon + Intel) | `SlideFlipper-*.dmg` |
-            | **Windows** (64-bit) | `SlideFlipper-Setup-*.exe` |
+            | **Mac** (Apple Silicon) | `SlideFlipper-Mac-arm64.dmg` |
+            | **Mac** (Intel) | `SlideFlipper-Mac-x64.dmg` |
+            | **Windows** (64-bit) | `SlideFlipper-Windows-x64.exe` |
 
             ### How to install
             1. Download the file for your platform above.

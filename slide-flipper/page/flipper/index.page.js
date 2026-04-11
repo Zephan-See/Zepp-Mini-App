@@ -79,7 +79,7 @@ Page(
         click_func() { push({ url: 'page/home/index.page' }) },
       })
       createWidget(widget.IMG, {
-        x: 330, y: TOP + 3, w: 28, h: 28,
+        x: 331, y: TOP + 2, w: 28, h: 28,
         src: 'gear.png',
       })
 

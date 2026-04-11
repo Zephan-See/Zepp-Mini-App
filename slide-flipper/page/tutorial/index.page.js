@@ -42,12 +42,14 @@ let _qrCaption = null
 
 const MAC_STEPS = [
   { n: '1', t: 'Scan the QR code' },
-  { n: '2', t: 'Copy and paste into Terminal' },
+  { n: '2', t: 'Copy a Mac download link' },
+  { n: '3', t: 'Send it to your Mac' },
 ]
 
 const WIN_STEPS = [
   { n: '1', t: 'Scan the QR code' },
-  { n: '2', t: 'Copy and paste into PowerShell' },
+  { n: '2', t: 'Copy a Windows download link' },
+  { n: '3', t: 'Send it to your PC' },
 ]
 
 Page(
@@ -72,7 +74,7 @@ Page(
         align_h: align.CENTER_H,
       })
       createWidget(widget.BUTTON, {
-        x: 0, y: TOP - 14, w: 112, h: 64,
+        x: 0, y: TOP - 18, w: 124, h: 72,
         normal_color: C.header, press_color: C.backPress,
         text: 'BACK', text_size: 15, color: C.title,
         click_func() { pop() },
@@ -153,7 +155,7 @@ Page(
       })
       createWidget(widget.TEXT, {
         x: 0, y: qrBoxY + 10, w: W, h: 14,
-        text: 'SCAN FOR ONE-COPY INSTALL',
+        text: 'SCAN FOR APP DOWNLOAD',
         text_size: 10, color: C.note,
         align_h: align.CENTER_H,
       })
@@ -163,7 +165,7 @@ Page(
       })
       _qrCaption = createWidget(widget.TEXT, {
         x: 32, y: qrBoxY + 252, w: W - 64, h: 14,
-        text: 'Phone opens a page with a Copy button',
+        text: 'Phone opens a page for copying the download link',
         text_size: 9, color: C.help,
         align_h: align.CENTER_H,
       })
@@ -198,8 +200,8 @@ Page(
       if (_qrCaption) {
         _qrCaption.setProperty(prop.MORE, {
           text: isMac
-            ? 'Phone opens a Mac page with a Copy button'
-            : 'Phone opens a Windows page with a Copy button',
+            ? 'Phone opens a Mac page for copying the download link'
+            : 'Phone opens a Windows page for copying the download link',
         })
       }
 

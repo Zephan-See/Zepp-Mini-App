@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SlideFlipper Mac Install</title>
+  <title>SlideFlipper Mac Download</title>
   <style>
     :root {
       color-scheme: light;
@@ -30,24 +30,32 @@
       margin: 0 0 20px;
       color: #444;
     }
+    ol {
+      margin: 0 0 24px 20px;
+      padding: 0;
+      color: #374151;
+      line-height: 1.6;
+    }
     .panel {
       border: 1px solid #e5e7eb;
       border-radius: 16px;
-      padding: 16px;
+      padding: 18px;
       background: #f8fafc;
+      margin-bottom: 16px;
     }
-    pre {
-      margin: 0;
-      white-space: pre-wrap;
-      word-break: break-word;
+    h2 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+    .desc {
       font-size: 15px;
-      line-height: 1.6;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      line-height: 1.5;
+      color: #4b5563;
+      margin: 0 0 14px;
     }
     .actions {
       display: flex;
       gap: 12px;
-      margin-top: 16px;
       flex-wrap: wrap;
     }
     button, a {
@@ -68,43 +76,73 @@
       background: #e5eefc;
       color: #1d4ed8;
     }
-    .note {
-      margin-top: 14px;
-      font-size: 13px;
-      color: #666;
+    .ghost {
+      background: #eef2ff;
+      color: #3730a3;
     }
     #copied {
-      min-height: 20px;
-      margin-top: 10px;
+      min-height: 22px;
+      margin-top: 8px;
       font-size: 14px;
       color: #15803d;
+    }
+    .note {
+      margin-top: 18px;
+      font-size: 13px;
+      color: #666;
     }
   </style>
 </head>
 <body>
   <main>
-    <h1>Install SlideFlipper on Mac</h1>
-    <p>Copy the command below, paste it into Terminal, then press Enter.</p>
+    <h1>Download SlideFlipper for Mac</h1>
+    <p>Copy the correct download link, send it to your Mac, then open that link on your Mac to install the desktop app.</p>
+    <ol>
+      <li>Tap <strong>Copy Link</strong> below.</li>
+      <li>Send the link to your Mac with iMessage, WhatsApp, Telegram, AirDrop, or email.</li>
+      <li>Open the link on your Mac and download the app.</li>
+    </ol>
+
     <div class="panel">
-      <pre id="cmd">cd ~/Desktop && curl -fsSL https://is.gd/aUbjFM -o slideflipper.js && node slideflipper.js</pre>
+      <h2>Apple Silicon</h2>
+      <p class="desc">For M1, M2, M3, and M4 Macs.</p>
       <div class="actions">
-        <button id="copyBtn" type="button">Copy</button>
-        <a href="terminal://">Open Terminal</a>
+        <button data-copy="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Mac-arm64.dmg" type="button">Copy Link</button>
+        <a href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Mac-arm64.dmg">Open Download</a>
       </div>
-      <div id="copied"></div>
-      <div class="note">If Terminal is already open, just paste and run the command there.</div>
     </div>
+
+    <div class="panel">
+      <h2>Intel Mac</h2>
+      <p class="desc">For older Intel-based Macs.</p>
+      <div class="actions">
+        <button data-copy="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Mac-x64.dmg" type="button">Copy Link</button>
+        <a href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Mac-x64.dmg">Open Download</a>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a class="ghost" href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest">Open Latest Release Page</a>
+    </div>
+    <div id="copied"></div>
+    <div class="note">If you're not sure which Mac you have, try Apple Silicon first on newer Macs from 2020 or later.</div>
+    <div class="note">After installing, open SlideFlipper and enter the shown IP on your watch.</div>
   </main>
+
   <script>
-    const text = document.getElementById('cmd').textContent;
     const copied = document.getElementById('copied');
-    document.getElementById('copyBtn').addEventListener('click', async () => {
+
+    async function copyText(text) {
       try {
         await navigator.clipboard.writeText(text);
-        copied.textContent = 'Copied. You can now paste it into Terminal.';
+        copied.textContent = 'Download link copied. Send it to your Mac and open it there.';
       } catch (err) {
-        copied.textContent = 'Copy failed. Press and hold the command to copy manually.';
+        copied.textContent = 'Copy failed. Press and hold the button link to copy manually.';
       }
+    }
+
+    document.querySelectorAll('button[data-copy]').forEach((button) => {
+      button.addEventListener('click', () => copyText(button.dataset.copy));
     });
   </script>
 </body>

@@ -91,6 +91,30 @@
       font-size: 13px;
       color: #666;
     }
+    .fix {
+      margin-top: 18px;
+      border: 1px solid #f59e0b;
+      background: #fff7ed;
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+    .fix p {
+      margin: 0 0 10px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #92400e;
+    }
+    .fix code {
+      display: block;
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #78350f;
+      word-break: break-word;
+    }
   </style>
 </head>
 <body>
@@ -126,6 +150,10 @@
     </div>
     <div id="copied"></div>
     <div class="note">If you're not sure which Mac you have, try Apple Silicon first on newer Macs from 2020 or later.</div>
+    <div class="fix">
+      <p><strong>If macOS says “SlideFlipper is damaged”</strong>, open Terminal and run this once:</p>
+      <code>xattr -cr /Applications/SlideFlipper.app</code>
+    </div>
     <div class="note">After installing, open SlideFlipper and enter the shown IP on your watch.</div>
   </main>
 

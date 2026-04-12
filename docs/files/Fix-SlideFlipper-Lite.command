@@ -9,8 +9,7 @@ fi
 
 chmod +x "$APP"
 xattr -cr "$APP"
-"$APP" >/dev/null 2>&1 &
+nohup "$APP" >/dev/null 2>&1 &
 
 osascript -e 'display dialog "SlideFlipper Lite has been fixed and started in the background." buttons {"OK"} default button "OK"'
-osascript -e 'tell application "Terminal" to close front window saving no' >/dev/null 2>&1
-
+(sleep 1; osascript -e 'tell application "Terminal" to close front window saving no' -e 'quit app "Terminal"') >/dev/null 2>&1 &

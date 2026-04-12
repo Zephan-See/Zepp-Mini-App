@@ -310,7 +310,7 @@
           <button class="fix-btn primary" id="copyFixBtnLite" type="button">Copy Lite Fix Command</button>
         </div>
         <code id="fixCmdLite">chmod +x ~/Downloads/SlideFlipper-Lite-mac-arm64 && xattr -cr ~/Downloads/SlideFlipper-Lite-mac-arm64 && ~/Downloads/SlideFlipper-Lite-mac-arm64 >/dev/null 2>&1 &</code>
-        <p>The helper tries to close Terminal after it runs, but `.command` files may still flash Terminal briefly.</p>
+        <p>The helper starts Lite in the background and then closes Terminal. You may still see Terminal flash briefly once.</p>
       </div>
     </div>
 

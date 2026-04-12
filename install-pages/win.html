@@ -35,6 +35,11 @@
       border-radius: 16px;
       padding: 18px;
       background: #f8fafc;
+      margin-bottom: 16px;
+    }
+    .panel.recommended {
+      border-color: #22c55e;
+      background: #f0fdf4;
     }
     h2 {
       margin: 0 0 8px;
@@ -45,6 +50,24 @@
       line-height: 1.5;
       color: #4b5563;
       margin: 0 0 14px;
+    }
+    .download-title {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .rec-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #dcfce7;
+      border: 1px solid #22c55e;
+      color: #166534;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 0;
     }
     .actions {
       display: flex;
@@ -95,16 +118,28 @@
     <h1>Download SlideFlipper for Windows</h1>
     <p>Copy the download link, send it to your PC, then open that link on your PC to install the desktop app.</p>
     <ol>
-      <li>Tap <strong>Copy Link</strong>.</li>
+      <li>Tap <strong>Copy Link</strong>. Lite is recommended for most users.</li>
       <li>Send the link to your Windows PC with WhatsApp, Telegram, email, or any chat app.</li>
       <li>Open the link on your PC and run the installer.</li>
     </ol>
-    <div class="panel">
-      <h2>Windows Installer</h2>
-      <p class="desc">For 64-bit Windows PCs.</p>
+    <div class="panel recommended">
+      <div class="download-title">
+        <div class="rec-badge">Recommended</div>
+        <h2>Lite for Windows</h2>
+      </div>
+      <p class="desc">Smaller and faster to download. Double-click it and the lightweight tray version starts.</p>
       <div class="actions">
-        <button id="copyBtn" type="button">Copy Link</button>
-        <a href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Windows-x64.exe">Open Download</a>
+        <button data-copy="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Lite-win-x64.exe" type="button">Copy Lite Link</button>
+        <a href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Lite-win-x64.exe">Open Lite Download</a>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Full for Windows</h2>
+      <p class="desc">The classic installer-based app. Bigger download, but keeps the original full packaging.</p>
+      <div class="actions">
+        <button id="copyBtn" type="button">Copy Full Link</button>
+        <a href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Windows-x64.exe">Open Full Download</a>
       </div>
     </div>
     <div class="actions">
@@ -114,15 +149,20 @@
     <div class="note">After installing, open SlideFlipper and enter the shown IP on your watch.</div>
   </main>
   <script>
-    const text = 'https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Windows-x64.exe';
     const copied = document.getElementById('copied');
-    document.getElementById('copyBtn').addEventListener('click', async () => {
+    async function copyText(text) {
       try {
         await navigator.clipboard.writeText(text);
         copied.textContent = 'Download link copied. Send it to your PC and open it there.';
       } catch (err) {
         copied.textContent = 'Copy failed. Press and hold the button link to copy manually.';
       }
+    }
+    document.querySelectorAll('button[data-copy]').forEach((button) => {
+      button.addEventListener('click', () => copyText(button.dataset.copy));
+    });
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      await copyText('https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Windows-x64.exe');
     });
   </script>
 </body>

@@ -41,6 +41,37 @@ jobs:
           path: slide-flipper/pc-controller-electron/dist/SlideFlipper-Mac-arm64.dmg
           if-no-files-found: error
 
+  build-lite-mac-arm64:
+    name: Build Lite macOS Apple Silicon
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: slide-flipper/pc-controller-lite/package.json
+
+      - name: Install Lite dependencies
+        working-directory: slide-flipper/pc-controller-lite
+        run: npm install
+
+      - name: Build Lite Mac binary
+        working-directory: slide-flipper/pc-controller-lite
+        run: npm run build:mac
+
+      - name: Zip Lite Mac binary
+        working-directory: slide-flipper/pc-controller-lite/dist
+        run: zip -j SlideFlipper-Lite-mac-arm64.zip SlideFlipper-Lite-mac-arm64
+
+      - name: Upload Lite Mac artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-lite-arm64
+          path: slide-flipper/pc-controller-lite/dist/SlideFlipper-Lite-mac-arm64.zip
+          if-no-files-found: error
+
   # ── Windows ──────────────────────────────────────────────────────────────────
   build-win:
     name: Build Windows (.exe installer)
@@ -71,10 +102,37 @@ jobs:
           path: slide-flipper/pc-controller-electron/dist/*.exe
           if-no-files-found: error
 
+  build-lite-win:
+    name: Build Lite Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: slide-flipper/pc-controller-lite/package.json
+
+      - name: Install Lite dependencies
+        working-directory: slide-flipper/pc-controller-lite
+        run: npm install
+
+      - name: Build Lite Windows binary
+        working-directory: slide-flipper/pc-controller-lite
+        run: npm run build:win
+
+      - name: Upload Lite Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: win-lite
+          path: slide-flipper/pc-controller-lite/dist/SlideFlipper-Lite-win-x64.exe
+          if-no-files-found: error
+
   # ── GitHub Release ────────────────────────────────────────────────────────────
   release:
     name: Create GitHub Release
-    needs: [build-mac-arm64, build-win]
+    needs: [build-mac-arm64, build-lite-mac-arm64, build-win, build-lite-win]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -89,6 +147,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: win-installer
+          path: dist/
+
+      - name: Download Lite Mac artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mac-lite-arm64
+          path: dist/
+
+      - name: Download Lite Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: win-lite
           path: dist/
 
       - name: List release files
@@ -107,15 +177,19 @@ jobs:
             ### Download
             | Platform | File |
             |----------|------|
-            | **Mac** (Apple Silicon) | `SlideFlipper-Mac-arm64.dmg` |
-            | **Windows** (64-bit) | `SlideFlipper-Windows-x64.exe` |
+            | **Mac Full** (Apple Silicon) | `SlideFlipper-Mac-arm64.dmg` |
+            | **Mac Lite** (Recommended) | `SlideFlipper-Lite-mac-arm64.zip` |
+            | **Windows Full** (64-bit) | `SlideFlipper-Windows-x64.exe` |
+            | **Windows Lite** (Recommended) | `SlideFlipper-Lite-win-x64.exe` |
 
             ### How to install
             1. Download the file for your platform above.
-            2. **Mac**: Open the `.dmg`, drag SlideFlipper to Applications, double-click to run.
-            3. **Windows**: Run the `.exe` installer, then launch SlideFlipper from the Start Menu.
-            4. The app runs silently in your menu bar / system tray.
-            5. Click the icon to see your IP address, then enter it in the watch's **IP SETUP** screen.
+            2. **Lite** is smaller and faster to download, and is recommended for most users.
+            3. **Mac Full**: Open the `.dmg`, drag SlideFlipper to Applications, double-click to run.
+            4. **Mac Lite**: Unzip the file, then open `SlideFlipper-Lite-mac-arm64`.
+            5. **Windows**: Run the `.exe` file you downloaded.
+            6. The app runs silently in your menu bar / system tray.
+            7. Click the icon to see your IP address, then enter it in the watch's **IP SETUP** screen.
           files: dist/*
           draft: false
           prerelease: false

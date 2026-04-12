@@ -43,6 +43,10 @@
       background: #f8fafc;
       margin-bottom: 16px;
     }
+    .panel.recommended {
+      border-color: #22c55e;
+      background: #f0fdf4;
+    }
     h2 {
       margin: 0 0 8px;
       font-size: 20px;
@@ -52,6 +56,12 @@
       line-height: 1.5;
       color: #4b5563;
       margin: 0 0 14px;
+    }
+    .download-title {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
     }
     .actions {
       display: flex;
@@ -182,18 +192,30 @@
     <h1>Download SlideFlipper for Mac</h1>
     <p>Copy the correct download link, send it to your Mac, then open that link on your Mac to install the desktop app.</p>
     <ol>
-      <li>Tap <strong>Copy Link</strong> below.</li>
+      <li>Tap <strong>Copy Link</strong> below. Lite is recommended for most users.</li>
       <li>Send the link to your Mac with iMessage, WhatsApp, Telegram, AirDrop, or email.</li>
       <li>Open the link on your Mac and download the app.</li>
       <li>If Mac blocks the app, use one of the fix methods below.</li>
     </ol>
 
-    <div class="panel">
-      <h2>Apple Silicon</h2>
-      <p class="desc">For M1, M2, M3, and M4 Macs.</p>
+    <div class="panel recommended">
+      <div class="download-title">
+        <div class="rec-badge">Recommended</div>
+        <h2>Lite for Apple Silicon</h2>
+      </div>
+      <p class="desc">Smaller and faster to download. After unzipping, open the lightweight tray version.</p>
       <div class="actions">
-        <button data-copy="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Mac-arm64.dmg" type="button">Copy Link</button>
-        <a href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Mac-arm64.dmg">Open Download</a>
+        <button data-copy="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Lite-mac-arm64.zip" type="button">Copy Lite Link</button>
+        <a href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Lite-mac-arm64.zip">Open Lite Download</a>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Full for Apple Silicon</h2>
+      <p class="desc">The classic app bundle. Bigger download, but installs like a traditional Mac app.</p>
+      <div class="actions">
+        <button data-copy="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Mac-arm64.dmg" type="button">Copy Full Link</button>
+        <a href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Mac-arm64.dmg">Open Full Download</a>
       </div>
     </div>
 

@@ -71,6 +71,46 @@
     }
 
     .dl-sub { text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+    .choice-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      background: #11161d;
+      margin-bottom: 16px;
+    }
+    .choice-card.recommended {
+      border-color: #1f8f4d;
+      background: #0f1f16;
+    }
+    .choice-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .choice-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .choice-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      background: #12351f;
+      border: 1px solid #1f8f4d;
+      color: #9ff0b7;
+    }
+    .choice-desc {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
 
     /* After card */
     .after-card {
@@ -190,7 +230,7 @@
     <div class="steps">
       <div class="step">
         <div class="step-num">1</div>
-        <div class="step-text">Choose the correct Mac download below.</div>
+        <div class="step-text">Choose <strong>Lite</strong> for the smaller, faster download, or <strong>Full</strong> if you want the classic app bundle.</div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
@@ -206,15 +246,36 @@
       </div>
     </div>
 
-    <a class="dl-btn" id="dlBtn"
-       href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Mac-arm64.dmg">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="7 10 12 15 17 10"/>
-        <line x1="12" y1="15" x2="12" y2="3"/>
-      </svg>
-      Download for Apple Silicon Mac
-    </a>
+    <div class="choice-card recommended">
+      <div class="choice-head">
+        <div class="choice-title">Lite for Mac</div>
+        <div class="choice-badge">Recommended</div>
+      </div>
+      <div class="choice-desc">Smaller and faster to download. Unzip it, then open the lightweight tray version.</div>
+      <a class="dl-btn" href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Lite-mac-arm64.zip">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Download Lite for Mac
+      </a>
+    </div>
+    <div class="choice-card">
+      <div class="choice-head">
+        <div class="choice-title">Full for Mac</div>
+      </div>
+      <div class="choice-desc">The original desktop app bundle. Bigger download, but installs like a traditional Mac app.</div>
+      <a class="dl-btn secondary" id="dlBtn"
+         href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Mac-arm64.dmg">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Download Full for Mac
+      </a>
+    </div>
     <p class="dl-sub">macOS 11 or later &nbsp;·&nbsp; Apple Silicon: M1 / M2 / M3 / M4</p>
 
     <div class="trust">
@@ -224,7 +285,7 @@
     <div class="fix-group">
       <div class="fix recommended">
         <div class="rec-badge">Recommended</div>
-        <p>After installing the DMG, download this helper and double-click it.</p>
+        <p>After installing the Mac app, download this helper and double-click it.</p>
         <div class="fix-actions">
           <a class="fix-btn secondary" href="/Zepp-Mini-App/files/Fix-SlideFlipper.command">Download .command Helper</a>
         </div>

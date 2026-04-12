@@ -96,13 +96,22 @@
       padding: 14px 16px;
       margin-bottom: 20px;
     }
+    .fix-group {
+      border: 1px solid #8a540d;
+      border-radius: 14px;
+      padding: 16px;
+      background: #181006;
+      margin-bottom: 24px;
+    }
     .fix.recommended {
       background: #2a1a05;
       border-color: #7c4a08;
+      margin-bottom: 0;
     }
     .fix.alternate {
       background: #24170a;
       border-color: #6a4315;
+      margin-bottom: 0;
     }
     .fix p {
       font-size: 13px;
@@ -155,7 +164,18 @@
       color: #f6d7a8;
       font-size: 14px;
       font-weight: 700;
-      margin: -4px 0 16px;
+      margin: 14px 0;
+    }
+    .rec-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #f59e0b;
+      color: #1f1303;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 10px;
     }
   </style>
 </head>
@@ -177,7 +197,11 @@
       </div>
       <div class="step">
         <div class="step-num">3</div>
-        <div class="step-text">Double-click <strong>SlideFlipper</strong> to run it. A small icon appears in your menu bar — done!</div>
+        <div class="step-text">If it opens normally, a small icon appears in your menu bar.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">To avoid Mac warnings, download and run the helper below after installing.</div>
       </div>
     </div>
 
@@ -205,21 +229,24 @@
       <p>⚠️ <strong>First time opening?</strong> macOS may warn "unverified developer" — that's normal for unsigned apps. Right-click the app → <strong>Open</strong> → <strong>Open</strong> to run it once. After that it opens normally.</p>
     </div>
 
-    <div class="fix recommended">
-      <p><strong>Recommended:</strong> after installing the DMG, download this helper and double-click it.</p>
-      <div class="fix-actions">
-        <a class="fix-btn secondary" href="/Zepp-Mini-App/files/Fix-SlideFlipper.command">Download .command Helper</a>
+    <div class="fix-group">
+      <div class="fix recommended">
+        <div class="rec-badge">Recommended</div>
+        <p>After installing the DMG, download this helper and double-click it.</p>
+        <div class="fix-actions">
+          <a class="fix-btn secondary" href="/Zepp-Mini-App/files/Fix-SlideFlipper.command">Download .command Helper</a>
+        </div>
+        <p>You can delete the `.command` file after it finishes running.</p>
       </div>
-      <p>You can delete the `.command` file after it finishes running.</p>
-    </div>
 
-    <div class="fix-or">or</div>
+      <div class="fix-or">or</div>
 
-    <div class="fix alternate">
-      <p><strong>Or</strong> if you prefer Terminal, copy and run this command once:</p>
-      <code id="fixCmd">xattr -cr /Applications/SlideFlipper.app</code>
-      <div class="fix-actions">
-        <button class="fix-btn primary" id="copyFixBtn" type="button">Copy Fix Command</button>
+      <div class="fix alternate">
+        <p>If you prefer Terminal, copy and run this command once:</p>
+        <code id="fixCmd">xattr -cr /Applications/SlideFlipper.app</code>
+        <div class="fix-actions">
+          <button class="fix-btn primary" id="copyFixBtn" type="button">Copy Fix Command</button>
+        </div>
       </div>
     </div>
 

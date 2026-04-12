@@ -41,37 +41,6 @@ jobs:
           path: slide-flipper/pc-controller-electron/dist/SlideFlipper-Mac-arm64.dmg
           if-no-files-found: error
 
-  # ── macOS Intel ─────────────────────────────────────────────────────────────
-  build-mac-x64:
-    name: Build macOS Intel (.dmg)
-    runs-on: macos-13
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: slide-flipper/pc-controller-electron/package.json
-
-      - name: Install dependencies
-        working-directory: slide-flipper/pc-controller-electron
-        run: npm install
-
-      - name: Build Mac DMG (x64)
-        working-directory: slide-flipper/pc-controller-electron
-        run: npx electron-builder --mac --x64
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CSC_IDENTITY_AUTO_DISCOVERY: false
-
-      - name: Upload Mac x64 DMG artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: mac-dmg-x64
-          path: slide-flipper/pc-controller-electron/dist/SlideFlipper-Mac-x64.dmg
-          if-no-files-found: error
-
   # ── Windows ──────────────────────────────────────────────────────────────────
   build-win:
     name: Build Windows (.exe installer)
@@ -105,7 +74,7 @@ jobs:
   # ── GitHub Release ────────────────────────────────────────────────────────────
   release:
     name: Create GitHub Release
-    needs: [build-mac-arm64, build-mac-x64, build-win]
+    needs: [build-mac-arm64, build-win]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -114,12 +83,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: mac-dmg-arm64
-          path: dist/
-
-      - name: Download Mac x64 artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: mac-dmg-x64
           path: dist/
 
       - name: Download Windows artifact
@@ -145,7 +108,6 @@ jobs:
             | Platform | File |
             |----------|------|
             | **Mac** (Apple Silicon) | `SlideFlipper-Mac-arm64.dmg` |
-            | **Mac** (Intel) | `SlideFlipper-Mac-x64.dmg` |
             | **Windows** (64-bit) | `SlideFlipper-Windows-x64.exe` |
 
             ### How to install

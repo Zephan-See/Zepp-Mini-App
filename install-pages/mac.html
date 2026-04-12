@@ -115,6 +115,30 @@
       color: #78350f;
       word-break: break-word;
     }
+    .fix-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .fix-btn {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .fix-btn.primary {
+      background: #d97706;
+      color: #fff;
+    }
+    .fix-btn.secondary {
+      background: #ffedd5;
+      color: #9a3412;
+    }
   </style>
 </head>
 <body>
@@ -152,7 +176,11 @@
     <div class="note">If you're not sure which Mac you have, try Apple Silicon first on newer Macs from 2020 or later.</div>
     <div class="fix">
       <p><strong>If macOS says “SlideFlipper is damaged”</strong>, open Terminal and run this once:</p>
-      <code>xattr -cr /Applications/SlideFlipper.app</code>
+      <code id="fixCmd">xattr -cr /Applications/SlideFlipper.app</code>
+      <div class="fix-actions">
+        <button class="fix-btn primary" id="copyFixBtn" type="button">Copy Fix Command</button>
+        <a class="fix-btn secondary" href="https://zephan-see.github.io/Zepp-Mini-App/files/Fix-SlideFlipper.command">Download .command Helper</a>
+      </div>
     </div>
     <div class="note">After installing, open SlideFlipper and enter the shown IP on your watch.</div>
   </main>
@@ -171,6 +199,16 @@
 
     document.querySelectorAll('button[data-copy]').forEach((button) => {
       button.addEventListener('click', () => copyText(button.dataset.copy));
+    });
+    const fixBtn = document.getElementById('copyFixBtn');
+    const fixCmd = document.getElementById('fixCmd').textContent;
+    fixBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(fixCmd);
+        fixBtn.textContent = 'Copied';
+      } catch (err) {
+        fixBtn.textContent = 'Copy failed';
+      }
     });
   </script>
 </body>

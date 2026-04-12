@@ -1,0 +1,30 @@
+{
+  "name": "slideflipper-lite",
+  "productName": "SlideFlipper Lite",
+  "version": "0.1.0",
+  "description": "Lightweight tray controller for SlideFlipper without Electron",
+  "main": "index.js",
+  "bin": "index.js",
+  "author": "Zephan",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js",
+    "build:mac": "pkg . --targets node18-macos-arm64 --output dist/SlideFlipper-Lite-mac-arm64",
+    "build:win": "pkg . --targets node18-win-x64 --output dist/SlideFlipper-Lite-win-x64.exe"
+  },
+  "pkg": {
+    "assets": [
+      "assets/**/*"
+    ],
+    "scripts": [
+      "index.js"
+    ],
+    "outputPath": "dist"
+  },
+  "dependencies": {
+    "systray": "^1.0.5"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  }
+}

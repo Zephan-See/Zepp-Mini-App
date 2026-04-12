@@ -36,7 +36,7 @@ function runScript(script, cb) {
 }
 
 // ── Platform command map ─────────────────────────────────────────────────────
-const PORT = 8765;
+const PORT = 3000;
 
 const ACTIONS = {
   next:     { mac: 'osascript -e "tell application \\"System Events\\" to key code 124"',

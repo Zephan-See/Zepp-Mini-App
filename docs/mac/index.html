@@ -248,7 +248,7 @@
       </div>
       <div class="step">
         <div class="step-num">4</div>
-        <div class="step-text">If Mac blocks the app, use the matching fix method below for <strong>Full</strong> or <strong>Lite</strong>.</div>
+        <div class="step-text">If Mac blocks the app, use the matching Terminal command below for <strong>Full</strong> or <strong>Lite</strong>.</div>
       </div>
     </div>
 
@@ -285,7 +285,7 @@
     <p class="dl-sub">macOS 11 or later &nbsp;·&nbsp; Apple Silicon: M1 / M2 / M3 / M4</p>
 
     <div class="trust">
-      <p>⚠️ <strong>First time opening?</strong> macOS may warn "unverified developer" — that's normal for unsigned apps. Use the matching helper below. Full and Lite use different fix paths.</p>
+      <p>⚠️ <strong>First time opening?</strong> macOS may warn "unverified developer" — that's normal for unsigned apps. Use the matching Terminal command below. Full and Lite use different paths.</p>
     </div>
 
     <div class="fix-group">
@@ -293,11 +293,9 @@
         <div class="fix-title">Fix Full for Mac</div>
         <p>Use this if you downloaded <strong>Full for Mac</strong>. It fixes and opens `/Applications/SlideFlipper.app`.</p>
         <div class="fix-actions">
-          <a class="fix-btn secondary" href="/Zepp-Mini-App/files/Fix-SlideFlipper-Full.command">Download Full Helper</a>
           <button class="fix-btn primary" id="copyFixBtnFull" type="button">Copy Full Fix Command</button>
         </div>
         <code id="fixCmdFull">xattr -cr /Applications/SlideFlipper.app && open /Applications/SlideFlipper.app</code>
-        <p>If Mac blocks the helper too, right-click it and choose <strong>Open</strong> once.</p>
       </div>
 
       <div class="fix-or">or</div>
@@ -306,11 +304,10 @@
         <div class="fix-title">Fix Lite for Mac</div>
         <p>Use this if you downloaded <strong>Lite for Mac</strong>. It fixes and starts the unzipped file in `Downloads`.</p>
         <div class="fix-actions">
-          <a class="fix-btn secondary" href="/Zepp-Mini-App/files/Fix-SlideFlipper-Lite.command">Download Lite Helper</a>
           <button class="fix-btn primary" id="copyFixBtnLite" type="button">Copy Lite Fix Command</button>
         </div>
         <code id="fixCmdLite">chmod +x ~/Downloads/SlideFlipper-Lite-mac-arm64 && xattr -cr ~/Downloads/SlideFlipper-Lite-mac-arm64 && ~/Downloads/SlideFlipper-Lite-mac-arm64 >/dev/null 2>&1 &</code>
-        <p>The helper starts Lite in the background and then closes Terminal. You may still see Terminal flash briefly once.</p>
+        <p>This starts Lite in the background after you paste the command into Terminal once.</p>
       </div>
     </div>
 

@@ -230,21 +230,18 @@
         <div class="rec-badge">Recommended</div>
         <p>Use this if you downloaded <strong>Full for Mac</strong>. It fixes and opens `/Applications/SlideFlipper.app`.</p>
         <div class="fix-actions">
-          <a class="fix-btn secondary" href="https://zephan-see.github.io/Zepp-Mini-App/files/Fix-SlideFlipper-Full.command">Download Full Helper</a>
           <button class="fix-btn primary" id="copyFixBtnFull" type="button">Copy Full Fix Command</button>
         </div>
         <code id="fixCmdFull">xattr -cr /Applications/SlideFlipper.app && open /Applications/SlideFlipper.app</code>
-        <p>If Mac blocks the helper too, right-click it and choose <strong>Open</strong> once.</p>
       </div>
       <div class="fix-or">or</div>
       <div class="fix alternate">
         <p>Use this if you downloaded <strong>Lite for Mac</strong>. It fixes and starts the unzipped file in `Downloads`.</p>
         <div class="fix-actions">
-          <a class="fix-btn secondary" href="https://zephan-see.github.io/Zepp-Mini-App/files/Fix-SlideFlipper-Lite.command">Download Lite Helper</a>
           <button class="fix-btn primary" id="copyFixBtnLite" type="button">Copy Lite Fix Command</button>
         </div>
         <code id="fixCmdLite">chmod +x ~/Downloads/SlideFlipper-Lite-mac-arm64 && xattr -cr ~/Downloads/SlideFlipper-Lite-mac-arm64 && ~/Downloads/SlideFlipper-Lite-mac-arm64 >/dev/null 2>&1 &</code>
-        <p>The helper starts Lite in the background and then closes Terminal. You may still see Terminal flash briefly once.</p>
+        <p>This starts Lite in the background after you paste the command into Terminal once.</p>
       </div>
     </div>
     <div class="note">After installing, open SlideFlipper and enter the shown IP on your watch.</div>

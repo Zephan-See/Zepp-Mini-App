@@ -153,6 +153,12 @@
       border-color: #6a4315;
       margin-bottom: 0;
     }
+    .fix-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff3d4;
+      margin-bottom: 10px;
+    }
     .fix p {
       font-size: 13px;
       color: #f6d7a8;
@@ -234,15 +240,15 @@
       </div>
       <div class="step">
         <div class="step-num">2</div>
-        <div class="step-text">Open the downloaded <strong>.dmg</strong> file and drag <strong>SlideFlipper</strong> into your Applications folder.</div>
+        <div class="step-text">Full installs into <strong>Applications</strong>. Lite stays in <strong>Downloads</strong> after unzipping.</div>
       </div>
       <div class="step">
         <div class="step-num">3</div>
-        <div class="step-text">If it opens normally, a small icon appears in your menu bar.</div>
+        <div class="step-text">Open the app you downloaded. If it opens normally, a small icon appears in your menu bar.</div>
       </div>
       <div class="step">
         <div class="step-num">4</div>
-        <div class="step-text">If Mac blocks the app, use one of the fix methods below.</div>
+        <div class="step-text">If Mac blocks the app, use the matching fix method below for <strong>Full</strong> or <strong>Lite</strong>.</div>
       </div>
     </div>
 
@@ -279,28 +285,32 @@
     <p class="dl-sub">macOS 11 or later &nbsp;·&nbsp; Apple Silicon: M1 / M2 / M3 / M4</p>
 
     <div class="trust">
-      <p>⚠️ <strong>First time opening?</strong> macOS may warn "unverified developer" — that's normal for unsigned apps. Right-click the app → <strong>Open</strong> → <strong>Open</strong> to run it once. After that it opens normally.</p>
+      <p>⚠️ <strong>First time opening?</strong> macOS may warn "unverified developer" — that's normal for unsigned apps. Use the matching helper below. Full and Lite use different fix paths.</p>
     </div>
 
     <div class="fix-group">
       <div class="fix recommended">
-        <div class="rec-badge">Recommended</div>
-        <p>After installing the Mac app, download this helper and double-click it.</p>
+        <div class="fix-title">Fix Full for Mac</div>
+        <p>Use this if you downloaded <strong>Full for Mac</strong>. It fixes and opens `/Applications/SlideFlipper.app`.</p>
         <div class="fix-actions">
-          <a class="fix-btn secondary" href="/Zepp-Mini-App/files/Fix-SlideFlipper.command">Download .command Helper</a>
+          <a class="fix-btn secondary" href="/Zepp-Mini-App/files/Fix-SlideFlipper-Full.command">Download Full Helper</a>
+          <button class="fix-btn primary" id="copyFixBtnFull" type="button">Copy Full Fix Command</button>
         </div>
+        <code id="fixCmdFull">xattr -cr /Applications/SlideFlipper.app && open /Applications/SlideFlipper.app</code>
         <p>If Mac blocks the helper too, right-click it and choose <strong>Open</strong> once.</p>
-        <p>You can delete the `.command` file after it finishes running.</p>
       </div>
 
       <div class="fix-or">or</div>
 
       <div class="fix alternate">
-        <p>If you prefer the most reliable option, copy and run this command once in Terminal:</p>
-        <code id="fixCmd">xattr -cr /Applications/SlideFlipper.app</code>
+        <div class="fix-title">Fix Lite for Mac</div>
+        <p>Use this if you downloaded <strong>Lite for Mac</strong>. It fixes and starts the unzipped file in `Downloads`.</p>
         <div class="fix-actions">
-          <button class="fix-btn primary" id="copyFixBtn" type="button">Copy Fix Command</button>
+          <a class="fix-btn secondary" href="/Zepp-Mini-App/files/Fix-SlideFlipper-Lite.command">Download Lite Helper</a>
+          <button class="fix-btn primary" id="copyFixBtnLite" type="button">Copy Lite Fix Command</button>
         </div>
+        <code id="fixCmdLite">chmod +x ~/Downloads/SlideFlipper-Lite-mac-arm64 && xattr -cr ~/Downloads/SlideFlipper-Lite-mac-arm64 && ~/Downloads/SlideFlipper-Lite-mac-arm64 >/dev/null 2>&1 &</code>
+        <p>The helper tries to close Terminal after it runs, but `.command` files may still flash Terminal briefly.</p>
       </div>
     </div>
 
@@ -315,16 +325,20 @@
     </div>
   </main>
   <script>
-    const fixBtn = document.getElementById('copyFixBtn');
-    const fixCmd = document.getElementById('fixCmd').textContent;
-    fixBtn.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(fixCmd);
-        fixBtn.textContent = 'Copied';
-      } catch (err) {
-        fixBtn.textContent = 'Copy failed';
-      }
-    });
+    function bindCopy(buttonId, codeId) {
+      const fixBtn = document.getElementById(buttonId);
+      const fixCmd = document.getElementById(codeId).textContent;
+      fixBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(fixCmd);
+          fixBtn.textContent = 'Copied';
+        } catch (err) {
+          fixBtn.textContent = 'Copy failed';
+        }
+      });
+    }
+    bindCopy('copyFixBtnFull', 'fixCmdFull');
+    bindCopy('copyFixBtnLite', 'fixCmdLite');
   </script>
 </body>
 </html>

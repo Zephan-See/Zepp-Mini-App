@@ -9,3 +9,7 @@ fi
 
 xattr -cr "$APP"
 open "$APP"
+
+osascript -e 'display dialog "SlideFlipper Full has been fixed and opened." buttons {"OK"} default button "OK"'
+osascript -e 'tell application "Terminal" to close front window saving no' >/dev/null 2>&1
+

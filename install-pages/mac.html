@@ -195,7 +195,8 @@
       <li>Tap <strong>Copy Link</strong> below. Lite is recommended for most users.</li>
       <li>Send the link to your Mac with iMessage, WhatsApp, Telegram, AirDrop, or email.</li>
       <li>Open the link on your Mac and download the app.</li>
-      <li>If Mac blocks the app, use one of the fix methods below.</li>
+      <li>Full installs into Applications. Lite stays in Downloads after unzipping.</li>
+      <li>If Mac blocks the app, use the matching fix method below.</li>
     </ol>
 
     <div class="panel recommended">
@@ -227,20 +228,23 @@
     <div class="fix-group">
       <div class="fix recommended">
         <div class="rec-badge">Recommended</div>
-        <p>After installing the DMG, download this helper and double-click it.</p>
+        <p>Use this if you downloaded <strong>Full for Mac</strong>. It fixes and opens `/Applications/SlideFlipper.app`.</p>
         <div class="fix-actions">
-          <a class="fix-btn secondary" href="https://zephan-see.github.io/Zepp-Mini-App/files/Fix-SlideFlipper.command">Download .command Helper</a>
+          <a class="fix-btn secondary" href="https://zephan-see.github.io/Zepp-Mini-App/files/Fix-SlideFlipper-Full.command">Download Full Helper</a>
+          <button class="fix-btn primary" id="copyFixBtnFull" type="button">Copy Full Fix Command</button>
         </div>
+        <code id="fixCmdFull">xattr -cr /Applications/SlideFlipper.app && open /Applications/SlideFlipper.app</code>
         <p>If Mac blocks the helper too, right-click it and choose <strong>Open</strong> once.</p>
-        <p>You can delete the `.command` file after it finishes running.</p>
       </div>
       <div class="fix-or">or</div>
       <div class="fix alternate">
-        <p>If you prefer the most reliable option, copy this command and paste it once in Terminal.</p>
-        <code id="fixCmd">xattr -cr /Applications/SlideFlipper.app</code>
+        <p>Use this if you downloaded <strong>Lite for Mac</strong>. It fixes and starts the unzipped file in `Downloads`.</p>
         <div class="fix-actions">
-          <button class="fix-btn primary" id="copyFixBtn" type="button">Copy Fix Command</button>
+          <a class="fix-btn secondary" href="https://zephan-see.github.io/Zepp-Mini-App/files/Fix-SlideFlipper-Lite.command">Download Lite Helper</a>
+          <button class="fix-btn primary" id="copyFixBtnLite" type="button">Copy Lite Fix Command</button>
         </div>
+        <code id="fixCmdLite">chmod +x ~/Downloads/SlideFlipper-Lite-mac-arm64 && xattr -cr ~/Downloads/SlideFlipper-Lite-mac-arm64 && ~/Downloads/SlideFlipper-Lite-mac-arm64 >/dev/null 2>&1 &</code>
+        <p>The helper tries to close Terminal after it runs, but `.command` files may still flash Terminal briefly.</p>
       </div>
     </div>
     <div class="note">After installing, open SlideFlipper and enter the shown IP on your watch.</div>
@@ -261,16 +265,20 @@
     document.querySelectorAll('button[data-copy]').forEach((button) => {
       button.addEventListener('click', () => copyText(button.dataset.copy));
     });
-    const fixBtn = document.getElementById('copyFixBtn');
-    const fixCmd = document.getElementById('fixCmd').textContent;
-    fixBtn.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(fixCmd);
-        fixBtn.textContent = 'Copied';
-      } catch (err) {
-        fixBtn.textContent = 'Copy failed';
-      }
-    });
+    function bindCopy(buttonId, codeId) {
+      const fixBtn = document.getElementById(buttonId);
+      const fixCmd = document.getElementById(codeId).textContent;
+      fixBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(fixCmd);
+          fixBtn.textContent = 'Copied';
+        } catch (err) {
+          fixBtn.textContent = 'Copy failed';
+        }
+      });
+    }
+    bindCopy('copyFixBtnFull', 'fixCmdFull');
+    bindCopy('copyFixBtnLite', 'fixCmdLite');
   </script>
 </body>
 </html>

@@ -10,10 +10,10 @@ permissions:
   contents: write   # needed to create releases and upload assets
 
 jobs:
-  # ── macOS ────────────────────────────────────────────────────────────────────
-  build-mac:
-    name: Build macOS (.dmg)
-    runs-on: macos-latest
+  # ── macOS Apple Silicon ─────────────────────────────────────────────────────
+  build-mac-arm64:
+    name: Build macOS Apple Silicon (.dmg)
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
 
@@ -27,18 +27,49 @@ jobs:
         working-directory: slide-flipper/pc-controller-electron
         run: npm install
 
-      - name: Build Mac DMG (arm64 + x64)
+      - name: Build Mac DMG (arm64)
         working-directory: slide-flipper/pc-controller-electron
-        run: npx electron-builder --mac --arm64 --x64
+        run: npx electron-builder --mac --arm64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: false   # skip code signing
 
-      - name: Upload Mac DMG artifact
+      - name: Upload Mac arm64 DMG artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mac-dmg
-          path: slide-flipper/pc-controller-electron/dist/*.dmg
+          name: mac-dmg-arm64
+          path: slide-flipper/pc-controller-electron/dist/SlideFlipper-Mac-arm64.dmg
+          if-no-files-found: error
+
+  # ── macOS Intel ─────────────────────────────────────────────────────────────
+  build-mac-x64:
+    name: Build macOS Intel (.dmg)
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: slide-flipper/pc-controller-electron/package.json
+
+      - name: Install dependencies
+        working-directory: slide-flipper/pc-controller-electron
+        run: npm install
+
+      - name: Build Mac DMG (x64)
+        working-directory: slide-flipper/pc-controller-electron
+        run: npx electron-builder --mac --x64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Upload Mac x64 DMG artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-dmg-x64
+          path: slide-flipper/pc-controller-electron/dist/SlideFlipper-Mac-x64.dmg
           if-no-files-found: error
 
   # ── Windows ──────────────────────────────────────────────────────────────────
@@ -74,15 +105,21 @@ jobs:
   # ── GitHub Release ────────────────────────────────────────────────────────────
   release:
     name: Create GitHub Release
-    needs: [build-mac, build-win]
+    needs: [build-mac-arm64, build-mac-x64, build-win]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download Mac artifact
+      - name: Download Mac arm64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: mac-dmg
+          name: mac-dmg-arm64
+          path: dist/
+
+      - name: Download Mac x64 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mac-dmg-x64
           path: dist/
 
       - name: Download Windows artifact

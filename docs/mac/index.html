@@ -96,6 +96,14 @@
       padding: 14px 16px;
       margin-bottom: 20px;
     }
+    .fix.recommended {
+      background: #2a1a05;
+      border-color: #7c4a08;
+    }
+    .fix.alternate {
+      background: #24170a;
+      border-color: #6a4315;
+    }
     .fix p {
       font-size: 13px;
       color: #f6d7a8;
@@ -190,15 +198,20 @@
       <p>⚠️ <strong>First time opening?</strong> macOS may warn "unverified developer" — that's normal for unsigned apps. Right-click the app → <strong>Open</strong> → <strong>Open</strong> to run it once. After that it opens normally.</p>
     </div>
 
-    <div class="fix">
-      <p><strong>If macOS says “SlideFlipper is damaged”</strong>, you can use either method below.</p>
-      <p><strong>Recommended:</strong> download the `.command` helper, then double-click it after installing the DMG.</p>
-      <code id="fixCmd">xattr -cr /Applications/SlideFlipper.app</code>
+    <div class="fix recommended">
+      <p><strong>Recommended:</strong> after installing the DMG, download this helper and double-click it.</p>
       <div class="fix-actions">
-        <button class="fix-btn primary" id="copyFixBtn" type="button">Copy Fix Command</button>
         <a class="fix-btn secondary" href="/Zepp-Mini-App/files/Fix-SlideFlipper.command">Download .command Helper</a>
       </div>
       <p>You can delete the `.command` file after it finishes running.</p>
+    </div>
+
+    <div class="fix alternate">
+      <p><strong>Or</strong> if you prefer Terminal, copy and run this command once:</p>
+      <code id="fixCmd">xattr -cr /Applications/SlideFlipper.app</code>
+      <div class="fix-actions">
+        <button class="fix-btn primary" id="copyFixBtn" type="button">Copy Fix Command</button>
+      </div>
     </div>
 
     <div class="after-card">

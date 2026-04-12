@@ -98,6 +98,14 @@
       border-radius: 14px;
       padding: 14px 16px;
     }
+    .fix.recommended {
+      background: #fff4db;
+      border-color: #f59e0b;
+    }
+    .fix.alternate {
+      background: #fff7ed;
+      border-color: #fdba74;
+    }
     .fix p {
       margin: 0 0 10px;
       font-size: 14px;
@@ -174,16 +182,19 @@
     </div>
     <div id="copied"></div>
     <div class="note">If you're not sure which Mac you have, try Apple Silicon first on newer Macs from 2020 or later.</div>
-    <div class="fix">
-      <p><strong>If macOS says “SlideFlipper is damaged”</strong>, you can use either method below.</p>
-      <p><strong>Recommended:</strong> download the `.command` helper, then double-click it after installing the DMG.</p>
+    <div class="fix recommended">
+      <p><strong>Recommended:</strong> after installing the DMG, download this helper and double-click it.</p>
+      <div class="fix-actions">
+        <a class="fix-btn secondary" href="https://zephan-see.github.io/Zepp-Mini-App/files/Fix-SlideFlipper.command">Download .command Helper</a>
+      </div>
+      <p>You can delete the `.command` file after it finishes running.</p>
+    </div>
+    <div class="fix alternate">
+      <p><strong>Or</strong> copy this command and paste it into Terminal once.</p>
       <code id="fixCmd">xattr -cr /Applications/SlideFlipper.app</code>
       <div class="fix-actions">
         <button class="fix-btn primary" id="copyFixBtn" type="button">Copy Fix Command</button>
-        <a class="fix-btn secondary" href="https://zephan-see.github.io/Zepp-Mini-App/files/Fix-SlideFlipper.command">Download .command Helper</a>
       </div>
-      <p><strong>Or</strong> copy the command above and paste it into Terminal once.</p>
-      <p>You can delete the `.command` file after it finishes running.</p>
     </div>
     <div class="note">After installing, open SlideFlipper and enter the shown IP on your watch.</div>
   </main>

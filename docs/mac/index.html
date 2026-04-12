@@ -111,6 +111,37 @@
       color: var(--muted);
       margin-bottom: 12px;
     }
+    .full-details {
+      margin: 28px 0 0;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #10151c;
+      overflow: hidden;
+    }
+    .full-details summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 16px 18px;
+      font-size: 15px;
+      font-weight: 800;
+      color: #c8d1db;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .full-details summary::-webkit-details-marker { display: none; }
+    .full-details summary::after { content: '+'; font-size: 20px; color: var(--blue); }
+    .full-details[open] summary::after { content: '-'; }
+    .full-details-body {
+      padding: 0 18px 18px;
+      border-top: 1px solid var(--border);
+    }
+    .full-note {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--muted);
+      margin: 14px 0 12px;
+    }
 
     /* After card */
     .after-card {
@@ -236,7 +267,7 @@
     <div class="steps">
       <div class="step">
         <div class="step-num">1</div>
-        <div class="step-text">Choose <strong>Lite</strong> for the smaller, faster download, or <strong>Full</strong> if you want the classic app bundle.</div>
+        <div class="step-text">Choose <strong>Lite</strong> for the smaller, faster download. If you want the classic app bundle, open <strong>Full Version</strong> at the bottom.</div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
@@ -285,21 +316,10 @@
     <p class="dl-sub">macOS 11 or later &nbsp;·&nbsp; Apple Silicon: M1 / M2 / M3 / M4</p>
 
     <div class="trust">
-      <p>⚠️ <strong>First time opening?</strong> macOS may warn "unverified developer" — that's normal for unsigned apps. Use the matching Terminal command below. Full and Lite use different paths.</p>
+      <p>⚠️ <strong>First time opening?</strong> macOS may warn "unverified developer" — that's normal for unsigned apps. Lite is shown below; Full Version is in the bottom section.</p>
     </div>
 
     <div class="fix-group">
-      <div class="fix recommended">
-        <div class="fix-title">Fix Full for Mac</div>
-        <p>Use this if you downloaded <strong>Full for Mac</strong>. It fixes and opens `/Applications/SlideFlipper.app`.</p>
-        <div class="fix-actions">
-          <button class="fix-btn primary" id="copyFixBtnFull" type="button">Copy Full Fix Command</button>
-        </div>
-        <code id="fixCmdFull">xattr -cr /Applications/SlideFlipper.app && open /Applications/SlideFlipper.app</code>
-      </div>
-
-      <div class="fix-or">or</div>
-
       <div class="fix alternate">
         <div class="fix-title">Fix Lite for Mac</div>
         <p>Use this if you downloaded <strong>Lite for Mac</strong>. It fixes and starts the unzipped file in `Downloads`.</p>
@@ -310,6 +330,30 @@
         <p>This starts Lite in the background after you paste the command into Terminal once.</p>
       </div>
     </div>
+
+    <details class="full-details">
+      <summary>Full Version</summary>
+      <div class="full-details-body">
+        <p class="full-note">Use Full if you prefer the traditional Mac app bundle in `Applications`, even though the download is larger.</p>
+        <a class="dl-btn secondary" id="dlBtn"
+           href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Mac-arm64.dmg">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Download Full for Mac
+        </a>
+        <div class="fix recommended">
+          <div class="fix-title">Fix Full for Mac</div>
+          <p>Use this if you downloaded <strong>Full for Mac</strong>. It fixes and opens `/Applications/SlideFlipper.app`.</p>
+          <div class="fix-actions">
+            <button class="fix-btn primary" id="copyFixBtnFull" type="button">Copy Full Fix Command</button>
+          </div>
+          <code id="fixCmdFull">xattr -cr /Applications/SlideFlipper.app && open /Applications/SlideFlipper.app</code>
+        </div>
+      </div>
+    </details>
 
     <div class="after-card">
       <h2>After opening SlideFlipper:</h2>
@@ -334,8 +378,8 @@
         }
       });
     }
-    bindCopy('copyFixBtnFull', 'fixCmdFull');
     bindCopy('copyFixBtnLite', 'fixCmdLite');
+    bindCopy('copyFixBtnFull', 'fixCmdFull');
   </script>
 </body>
 </html>

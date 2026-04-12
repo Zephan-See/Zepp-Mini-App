@@ -57,6 +57,31 @@
       align-items: flex-start;
       gap: 8px;
     }
+    .full-details {
+      margin: 24px 0 0;
+      border: 1px solid #d1d5db;
+      border-radius: 16px;
+      background: #f8fafc;
+      overflow: hidden;
+    }
+    .full-details summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 16px 18px;
+      font-size: 15px;
+      font-weight: 800;
+      color: #111827;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .full-details summary::-webkit-details-marker { display: none; }
+    .full-details summary::after { content: '+'; font-size: 20px; color: #1d4ed8; }
+    .full-details[open] summary::after { content: '-'; }
+    .full-details-body {
+      padding: 0 18px 18px;
+      border-top: 1px solid #e5e7eb;
+    }
     .rec-badge {
       display: inline-flex;
       align-items: center;
@@ -134,19 +159,24 @@
       </div>
     </div>
 
-    <div class="panel">
-      <h2>Full for Windows</h2>
-      <p class="desc">The classic installer-based app. Bigger download, but keeps the original full packaging.</p>
-      <div class="actions">
-        <button id="copyBtn" type="button">Copy Full Link</button>
-        <a href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Windows-x64.exe">Open Full Download</a>
-      </div>
-    </div>
     <div class="actions">
       <a class="ghost" href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest">Open Latest Release Page</a>
     </div>
     <div id="copied"></div>
     <div class="note">After installing, open SlideFlipper and enter the shown IP on your watch.</div>
+    <details class="full-details">
+      <summary>Full Version</summary>
+      <div class="full-details-body">
+        <div class="panel" style="margin-top:16px; margin-bottom:0;">
+          <h2>Full for Windows</h2>
+          <p class="desc">The classic installer-based app. Bigger download, but keeps the original full packaging.</p>
+          <div class="actions">
+            <button id="copyBtn" type="button">Copy Full Link</button>
+            <a href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Windows-x64.exe">Open Full Download</a>
+          </div>
+        </div>
+      </div>
+    </details>
   </main>
   <script>
     const copied = document.getElementById('copied');

@@ -63,6 +63,31 @@
       align-items: flex-start;
       gap: 8px;
     }
+    .full-details {
+      margin: 24px 0 0;
+      border: 1px solid #d1d5db;
+      border-radius: 16px;
+      background: #f8fafc;
+      overflow: hidden;
+    }
+    .full-details summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 16px 18px;
+      font-size: 15px;
+      font-weight: 800;
+      color: #111827;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .full-details summary::-webkit-details-marker { display: none; }
+    .full-details summary::after { content: '+'; font-size: 20px; color: #1d4ed8; }
+    .full-details[open] summary::after { content: '-'; }
+    .full-details-body {
+      padding: 0 18px 18px;
+      border-top: 1px solid #e5e7eb;
+    }
     .actions {
       display: flex;
       gap: 12px;
@@ -196,7 +221,7 @@
       <li>Send the link to your Mac with iMessage, WhatsApp, Telegram, AirDrop, or email.</li>
       <li>Open the link on your Mac and download the app.</li>
       <li>Full installs into Applications. Lite stays in Downloads after unzipping.</li>
-      <li>If Mac blocks the app, use the matching fix method below.</li>
+      <li>If Mac blocks the app, use the Lite command below, or open Full Version for the classic app bundle.</li>
     </ol>
 
     <div class="panel recommended">
@@ -211,30 +236,12 @@
       </div>
     </div>
 
-    <div class="panel">
-      <h2>Full for Apple Silicon</h2>
-      <p class="desc">The classic app bundle. Bigger download, but installs like a traditional Mac app.</p>
-      <div class="actions">
-        <button data-copy="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Mac-arm64.dmg" type="button">Copy Full Link</button>
-        <a href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Mac-arm64.dmg">Open Full Download</a>
-      </div>
-    </div>
-
     <div class="actions">
       <a class="ghost" href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest">Open Latest Release Page</a>
     </div>
     <div id="copied"></div>
     <div class="note">This download currently supports Apple Silicon Macs: M1, M2, M3, and M4.</div>
     <div class="fix-group">
-      <div class="fix recommended">
-        <div class="rec-badge">Recommended</div>
-        <p>Use this if you downloaded <strong>Full for Mac</strong>. It fixes and opens `/Applications/SlideFlipper.app`.</p>
-        <div class="fix-actions">
-          <button class="fix-btn primary" id="copyFixBtnFull" type="button">Copy Full Fix Command</button>
-        </div>
-        <code id="fixCmdFull">xattr -cr /Applications/SlideFlipper.app && open /Applications/SlideFlipper.app</code>
-      </div>
-      <div class="fix-or">or</div>
       <div class="fix alternate">
         <p>Use this if you downloaded <strong>Lite for Mac</strong>. It fixes and starts the unzipped file in `Downloads`.</p>
         <div class="fix-actions">
@@ -244,6 +251,27 @@
         <p>This starts Lite in the background after you paste the command into Terminal once.</p>
       </div>
     </div>
+    <details class="full-details">
+      <summary>Full Version</summary>
+      <div class="full-details-body">
+        <div class="panel" style="margin-top:16px; margin-bottom:16px;">
+          <h2>Full for Apple Silicon</h2>
+          <p class="desc">The classic app bundle. Bigger download, but installs like a traditional Mac app.</p>
+          <div class="actions">
+            <button data-copy="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Mac-arm64.dmg" type="button">Copy Full Link</button>
+            <a href="https://github.com/Zephan-See/Zepp-Mini-App/releases/latest/download/SlideFlipper-Mac-arm64.dmg">Open Full Download</a>
+          </div>
+        </div>
+        <div class="fix recommended">
+          <div class="rec-badge">Full Version</div>
+          <p>Use this if you downloaded <strong>Full for Mac</strong>. It fixes and opens `/Applications/SlideFlipper.app`.</p>
+          <div class="fix-actions">
+            <button class="fix-btn primary" id="copyFixBtnFull" type="button">Copy Full Fix Command</button>
+          </div>
+          <code id="fixCmdFull">xattr -cr /Applications/SlideFlipper.app && open /Applications/SlideFlipper.app</code>
+        </div>
+      </div>
+    </details>
     <div class="note">After installing, open SlideFlipper and enter the shown IP on your watch.</div>
   </main>
 
@@ -274,8 +302,8 @@
         }
       });
     }
-    bindCopy('copyFixBtnFull', 'fixCmdFull');
     bindCopy('copyFixBtnLite', 'fixCmdLite');
+    bindCopy('copyFixBtnFull', 'fixCmdFull');
   </script>
 </body>
 </html>

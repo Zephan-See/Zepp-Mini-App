@@ -1,7 +1,7 @@
 {
   "name": "slideflipper-lite",
   "productName": "SlideFlipper Lite",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Lightweight tray controller for SlideFlipper without Electron",
   "main": "index.js",
   "bin": "index.js",
@@ -14,7 +14,9 @@
   },
   "pkg": {
     "assets": [
-      "assets/**/*"
+      "assets/**/*",
+      "node_modules/systray/traybin/**/*",
+      "node_modules/systray/package.json"
     ],
     "scripts": [
       "index.js"

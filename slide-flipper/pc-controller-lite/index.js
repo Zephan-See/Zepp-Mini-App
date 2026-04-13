@@ -61,6 +61,15 @@ const ACTIONS = {
 let tray = null;
 let server = null;
 
+function logLiteError(message) {
+  const line = `[${new Date().toISOString()}] ${message}\n`;
+  try {
+    fs.appendFileSync(path.join(os.tmpdir(), 'slideflipper-lite.log'), line);
+  } catch (_) {
+    // best effort only
+  }
+}
+
 function getLocalIP() {
   const ifaces = os.networkInterfaces();
   for (const name of Object.keys(ifaces)) {
@@ -250,6 +259,11 @@ function startTray() {
     if (action.seq_id === MENU_INDEX.quit) {
       shutdown();
     }
+  });
+
+  tray.onError((err) => {
+    logLiteError(`Tray error: ${err && err.message ? err.message : String(err)}`);
+    process.exit(1);
   });
 }
 

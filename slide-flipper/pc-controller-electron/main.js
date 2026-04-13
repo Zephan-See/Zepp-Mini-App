@@ -76,12 +76,11 @@ function ensureWindowsFirewallRule() {
   if (process.platform !== 'win32') return;
 
   const ruleName = 'SlideFlipper Port 3000';
-  const checkCmd = `powershell -NoProfile -Command "Get-NetFirewallRule -DisplayName '${ruleName}' -ErrorAction SilentlyContinue | Select-Object -First 1 | ForEach-Object { $_.DisplayName }"`;
-  const addCmd = `powershell -NoProfile -Command "Start-Process powershell -Verb RunAs -WindowStyle Hidden -ArgumentList '-NoProfile -Command \\\"New-NetFirewallRule -DisplayName ''${ruleName}'' -Direction Inbound -Action Allow -Protocol TCP -LocalPort ${PORT} -Profile Private\\\"'"`;
+  const checkCmd = `cmd /c netsh advfirewall firewall show rule name="${ruleName}"`;
+  const addCmd = `powershell -NoProfile -Command "Start-Process powershell -Verb RunAs -WindowStyle Hidden -ArgumentList '-NoProfile -Command \\\"netsh advfirewall firewall add rule name=''''${ruleName}'''' dir=in action=allow protocol=TCP localport=${PORT} profile=any\\\"'"`;
 
   exec(checkCmd, (err, stdout) => {
-    if (err) return;
-    if ((stdout || '').trim() === ruleName) return;
+    if (!err && (stdout || '').includes(ruleName)) return;
     exec(addCmd, () => {});
   });
 }

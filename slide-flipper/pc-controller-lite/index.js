@@ -70,17 +70,54 @@ function logLiteError(message) {
   }
 }
 
-function getLocalIP() {
+function isPrivateIPv4(address) {
+  if (address.startsWith('10.')) return true;
+  if (address.startsWith('192.168.')) return true;
+  const m = address.match(/^172\.(\d+)\./);
+  return !!m && Number(m[1]) >= 16 && Number(m[1]) <= 31;
+}
+
+function interfaceScore(name, address) {
+  const lower = name.toLowerCase();
+  let score = 0;
+
+  if (isPrivateIPv4(address)) score += 20;
+  if (address.startsWith('192.168.')) score += 10;
+  if (address.startsWith('10.')) score += 8;
+  if (/wi-?fi|wlan|wireless/.test(lower)) score += 20;
+  if (/ethernet|local area/.test(lower)) score += 10;
+
+  if (/docker|wsl|hyper-v|vethernet|vmware|virtualbox|virtual|tailscale|zerotier|hamachi|bluetooth|loopback/.test(lower)) {
+    score -= 100;
+  }
+
+  return score;
+}
+
+function getAllLocalIPs() {
   const ifaces = os.networkInterfaces();
+  const candidates = [];
+
   for (const name of Object.keys(ifaces)) {
     const list = ifaces[name];
     if (!list) continue;
     for (const iface of list) {
-      if (iface.family === 'IPv4' && !iface.internal) {
-        return iface.address;
-      }
+      if (iface.family !== 'IPv4' || iface.internal) continue;
+      if (iface.address.startsWith('169.254.')) continue;
+      candidates.push({
+        name,
+        address: iface.address,
+        score: interfaceScore(name, iface.address),
+      });
     }
   }
+
+  return candidates.sort((a, b) => b.score - a.score);
+}
+
+function getLocalIP() {
+  const candidates = getAllLocalIPs();
+  if (candidates.length) return candidates[0].address;
   return '127.0.0.1';
 }
 
@@ -111,42 +148,61 @@ function runScript(script, cb) {
 }
 
 function buildMenu(ip) {
+  const extra = getAllLocalIPs()
+    .filter(({ address }) => address !== ip)
+    .slice(0, 3)
+    .map(({ address }) => address)
+    .join(', ');
+
+  const items = [
+    {
+      title: 'SlideFlipper Lite running',
+      tooltip: 'Tray Lite mode is active',
+      enabled: false,
+    },
+    {
+      title: `IP: ${ip}`,
+      tooltip: 'Enter this IP on the watch',
+      enabled: false,
+    },
+  ];
+
+  if (extra) {
+    items.push({
+      title: `Other IPs: ${extra}`,
+      tooltip: 'Other detected local addresses',
+      enabled: false,
+    });
+  }
+
+  items.push(
+    {
+      title: `Port: ${PORT}`,
+      tooltip: 'Watch sends commands to this port',
+      enabled: false,
+    },
+    {
+      title: 'Refresh IP',
+      tooltip: 'Refresh the local IP address',
+      enabled: true,
+    },
+    {
+      title: 'Open install guide',
+      tooltip: 'Open the public install page',
+      enabled: true,
+    },
+    {
+      title: 'Quit SlideFlipper Lite',
+      tooltip: 'Stop the tray app',
+      enabled: true,
+    },
+  );
+
   return {
     icon: iconBase64(),
     title: '',
     tooltip: `SlideFlipper Lite • ${ip}:${PORT}`,
-    items: [
-      {
-        title: 'SlideFlipper Lite running',
-        tooltip: 'Tray Lite mode is active',
-        enabled: false,
-      },
-      {
-        title: `IP: ${ip}`,
-        tooltip: 'Enter this IP on the watch',
-        enabled: false,
-      },
-      {
-        title: `Port: ${PORT}`,
-        tooltip: 'Watch sends commands to this port',
-        enabled: false,
-      },
-      {
-        title: 'Refresh IP',
-        tooltip: 'Refresh the local IP address',
-        enabled: true,
-      },
-      {
-        title: 'Open install guide',
-        tooltip: 'Open the public install page',
-        enabled: true,
-      },
-      {
-        title: 'Quit SlideFlipper Lite',
-        tooltip: 'Stop the tray app',
-        enabled: true,
-      },
-    ],
+    items,
   };
 }
 

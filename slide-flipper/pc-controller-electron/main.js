@@ -14,17 +14,54 @@ if (process.platform === 'darwin') {
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-function getLocalIP() {
+function isPrivateIPv4(address) {
+  if (address.startsWith('10.')) return true;
+  if (address.startsWith('192.168.')) return true;
+  const m = address.match(/^172\.(\d+)\./);
+  return !!m && Number(m[1]) >= 16 && Number(m[1]) <= 31;
+}
+
+function interfaceScore(name, address) {
+  const lower = name.toLowerCase();
+  let score = 0;
+
+  if (isPrivateIPv4(address)) score += 20;
+  if (address.startsWith('192.168.')) score += 10;
+  if (address.startsWith('10.')) score += 8;
+  if (/wi-?fi|wlan|wireless/.test(lower)) score += 20;
+  if (/ethernet|local area/.test(lower)) score += 10;
+
+  if (/docker|wsl|hyper-v|vethernet|vmware|virtualbox|virtual|tailscale|zerotier|hamachi|bluetooth|loopback/.test(lower)) {
+    score -= 100;
+  }
+
+  return score;
+}
+
+function getAllLocalIPs() {
   const ifaces = os.networkInterfaces();
+  const candidates = [];
+
   for (const name of Object.keys(ifaces)) {
     const list = ifaces[name];
     if (!list) continue;
     for (const iface of list) {
-      if (iface.family === 'IPv4' && !iface.internal) {
-        return iface.address;
-      }
+      if (iface.family !== 'IPv4' || iface.internal) continue;
+      if (iface.address.startsWith('169.254.')) continue;
+      candidates.push({
+        name,
+        address: iface.address,
+        score: interfaceScore(name, iface.address),
+      });
     }
   }
+
+  return candidates.sort((a, b) => b.score - a.score);
+}
+
+function getLocalIP() {
+  const candidates = getAllLocalIPs();
+  if (candidates.length) return candidates[0].address;
   return '127.0.0.1';
 }
 
@@ -97,17 +134,37 @@ function startServer() {
 let tray = null;
 let currentIP = '';
 
+function secondaryIPs() {
+  return getAllLocalIPs()
+    .filter(({ address }) => address !== currentIP)
+    .slice(0, 3)
+    .map(({ address }) => address)
+    .join(', ');
+}
+
 function buildMenu() {
+  const extra = secondaryIPs();
+  const ipItems = [
+    {
+      label: `Your IP:  ${currentIP}`,
+      enabled: false,
+    },
+  ];
+
+  if (extra) {
+    ipItems.push({
+      label: `Other IPs: ${extra}`,
+      enabled: false,
+    });
+  }
+
   return Menu.buildFromTemplate([
     {
       label: 'SlideFlipper',
       enabled: false,
     },
     { type: 'separator' },
-    {
-      label: `Your IP:  ${currentIP}`,
-      enabled: false,
-    },
+    ...ipItems,
     {
       label: `Port:  ${PORT}`,
       enabled: false,

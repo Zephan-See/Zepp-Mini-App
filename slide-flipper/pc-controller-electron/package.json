@@ -1,7 +1,7 @@
 {
   "name": "slideflipper",
   "productName": "SlideFlipper",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Use your Amazfit watch as a presentation remote",
   "main": "main.js",
   "author": "Zephan",

@@ -72,6 +72,20 @@ function runScript(script, cb) {
   });
 }
 
+function ensureWindowsFirewallRule() {
+  if (process.platform !== 'win32') return;
+
+  const ruleName = 'SlideFlipper Port 3000';
+  const checkCmd = `powershell -NoProfile -Command "Get-NetFirewallRule -DisplayName '${ruleName}' -ErrorAction SilentlyContinue | Select-Object -First 1 | ForEach-Object { $_.DisplayName }"`;
+  const addCmd = `powershell -NoProfile -Command "Start-Process powershell -Verb RunAs -WindowStyle Hidden -ArgumentList '-NoProfile -Command \\\"New-NetFirewallRule -DisplayName ''${ruleName}'' -Direction Inbound -Action Allow -Protocol TCP -LocalPort ${PORT} -Profile Private\\\"'"`;
+
+  exec(checkCmd, (err, stdout) => {
+    if (err) return;
+    if ((stdout || '').trim() === ruleName) return;
+    exec(addCmd, () => {});
+  });
+}
+
 // ── Platform command map ─────────────────────────────────────────────────────
 const PORT = 3000;
 
@@ -191,6 +205,7 @@ app.whenReady().then(() => {
   // Extra dock hide safety (macOS)
   if (app.dock) app.dock.hide();
 
+  ensureWindowsFirewallRule();
   currentIP = getLocalIP();
 
   // Load tray icon

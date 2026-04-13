@@ -1,7 +1,7 @@
 {
   "name": "slideflipper-lite",
   "productName": "SlideFlipper Lite",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Lightweight tray controller for SlideFlipper without Electron",
   "main": "index.js",
   "bin": "index.js",

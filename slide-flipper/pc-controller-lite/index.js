@@ -147,6 +147,25 @@ function runScript(script, cb) {
   });
 }
 
+function ensureWindowsFirewallRule() {
+  if (process.platform !== 'win32') return;
+
+  const ruleName = 'SlideFlipper Port 3000';
+  const checkCmd = `powershell -NoProfile -Command "Get-NetFirewallRule -DisplayName '${ruleName}' -ErrorAction SilentlyContinue | Select-Object -First 1 | ForEach-Object { $_.DisplayName }"`;
+  const addCmd = `powershell -NoProfile -Command "Start-Process powershell -Verb RunAs -WindowStyle Hidden -ArgumentList '-NoProfile -Command \\\"New-NetFirewallRule -DisplayName ''${ruleName}'' -Direction Inbound -Action Allow -Protocol TCP -LocalPort ${PORT} -Profile Private\\\"'"`;
+
+  exec(checkCmd, (err, stdout) => {
+    if (err) {
+      logLiteError(`Firewall check failed: ${err.message}`);
+      return;
+    }
+    if ((stdout || '').trim() === ruleName) return;
+    exec(addCmd, (addErr) => {
+      if (addErr) logLiteError(`Firewall rule prompt failed: ${addErr.message}`);
+    });
+  });
+}
+
 function buildMenu(ip) {
   const extra = getAllLocalIPs()
     .filter(({ address }) => address !== ip)
@@ -333,6 +352,7 @@ function shutdown() {
   process.exit(0);
 }
 
+ensureWindowsFirewallRule();
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
